@@ -1,0 +1,144 @@
+{% extends "base.html" %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="/static/css/history.css?v={{ time }}">
+{% endblock %}
+
+{% block content %}
+<!-- Page Hero -->
+<section class="page-hero">
+  <div class="container">
+    <h1>📜 खरेदी इतिहास व्यवस्थापन</h1>
+    <p>मागील सर्व किराणा पावत्या, वस्तूंचे दर, बजेट समतोल तपासा, तपशीलवार विश्लेषण करा आणि खरेदी नोंदी व्यवस्थापित करा.</p>
+  </div>
+</section>
+
+<div class="container">
+
+  <!-- Summary Metric Cards -->
+  <div class="metrics-grid">
+    <div class="metric-card">
+      <div class="metric-icon">🛍️</div>
+      <div class="metric-info">
+        <span class="metric-label">एकूण खरेदी फेऱ्या</span>
+        <span id="metric-total-trips" class="metric-value">0</span>
+      </div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-icon">💰</div>
+      <div class="metric-info">
+        <span class="metric-label">एकूण खर्च</span>
+        <span id="metric-total-spend" class="metric-value">₹0.00</span>
+      </div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-icon">⚖️</div>
+      <div class="metric-info">
+        <span class="metric-label">संतुलित बजेट प्रमाण</span>
+        <span id="metric-balanced-pct" class="metric-value">0%</span>
+      </div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-icon">📊</div>
+      <div class="metric-info">
+        <span class="metric-label">सरासरी खरेदी खर्च</span>
+        <span id="metric-avg-spend" class="metric-value">₹0.00</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Filter Controls Bar -->
+  <div class="filter-bar">
+    <form id="history-filter-form" class="filter-grid">
+      <div class="form-group" style="margin-bottom:0;">
+        <label class="form-label" style="font-size:0.85rem;">दुकानदाराचे नाव:</label>
+        <input type="text" id="filter-merchant" class="form-control" placeholder="उदा. पाटील किराणा...">
+      </div>
+
+      <div class="form-group" style="margin-bottom:0;">
+        <label class="form-label" style="font-size:0.85rem;">बजेट स्थिती:</label>
+        <select id="filter-status" class="form-control">
+          <option value="सर्व">सर्व स्थिती</option>
+          <option value="संतुलित बजेट">संतुलित बजेट</option>
+          <option value="असंतुलित खर्च">असंतुलित खर्च</option>
+        </select>
+      </div>
+
+      <div class="form-group" style="margin-bottom:0;">
+        <label class="form-label" style="font-size:0.85rem;">तारखेपासून:</label>
+        <input type="date" id="filter-start-date" class="form-control">
+      </div>
+
+      <div class="form-group" style="margin-bottom:0;">
+        <label class="form-label" style="font-size:0.85rem;">तारखेपर्यंत:</label>
+        <input type="date" id="filter-end-date" class="form-control">
+      </div>
+
+      <div style="display:flex;gap:8px;">
+        <button type="submit" class="btn btn-primary">🔍 फिल्टर करा</button>
+        <button type="button" id="filter-reset-btn" class="btn btn-secondary">रीसेट</button>
+      </div>
+    </form>
+  </div>
+
+  <!-- Loading State Indicator -->
+  <div id="trips-loading" style="display:none;text-align:center;padding:30px;color:#64748B;">
+    इतिहास लोड होत आहे...
+  </div>
+
+  <!-- Empty State -->
+  <div id="trips-empty-state" class="empty-state" style="display:none;">
+    <div class="empty-state-icon">📭</div>
+    <h3>कोणतीही खरेदी नोंद सापडली नाही</h3>
+    <p>आपल्या फिल्टर निकषांशी जुळणारी खरेदी नोंद उपलब्ध नाही किंवा अद्याप कोणतीही खरेदी जतन केलेली नाही.</p>
+    <a href="/" class="btn btn-primary">नवीन खरेदी सुरू करा</a>
+  </div>
+
+  <!-- Trips List Container -->
+  <div id="trips-list-container" class="trips-container">
+    <!-- Populated dynamically via history.js -->
+  </div>
+
+</div>
+
+<!-- Trip Drill-down Modal -->
+<div id="trip-drilldown-modal" class="modal-overlay">
+  <div class="modal-content" style="max-width:820px;">
+    <div class="modal-header">
+      <h3>🔍 खरेदी तपशील व हिशोब</h3>
+      <button id="close-drilldown-modal" class="modal-close">✕</button>
+    </div>
+    <div class="modal-body" id="trip-drilldown-content">
+      <!-- Injected dynamically -->
+    </div>
+  </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div id="delete-confirm-modal" class="modal-overlay">
+  <div class="modal-content" style="max-width:440px;text-align:center;">
+    <div class="modal-body" style="padding:32px 24px;">
+      <div style="font-size:3rem;margin-bottom:12px;">⚠️</div>
+      <h3 style="font-size:1.35rem;font-weight:700;color:#DC2626;margin-bottom:8px;">
+        ही खरेदी इतिहासामधून कायमची हटवायची आहे का?
+      </h3>
+      <p style="font-size:0.95rem;color:#64748B;margin-bottom:24px;">
+        नोंद हटवल्यानंतर ही माहिती कायमची नष्ट होईल आणि आगामी खरेदीसाठीची बेसलाईन आपोआप अद्ययावत केली जाईल.
+      </p>
+      <div style="display:flex;gap:12px;justify-content:center;">
+        <button id="delete-confirm-yes" class="btn btn-danger btn-lg">
+          🗑️ होय, कायमचे हटवा
+        </button>
+        <button id="delete-confirm-no" class="btn btn-secondary btn-lg">
+          रद्द करा
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script src="/static/js/history.js?v={{ time }}"></script>
+{% endblock %}

@@ -1,0 +1,132 @@
+{% extends "base.html" %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="/static/css/about.css?v={{ time }}">
+{% endblock %}
+
+{% block content %}
+<!-- Page Hero -->
+<section class="page-hero">
+  <div class="container">
+    <h1>ℹ️ आमच्याबद्दल व सिस्टीम कार्यप्रणाली</h1>
+    <p>स्थानिक किराणा खरेदीत पारदर्शकता, गणितीय अचूकता आणि ग्राहक-व्यापारी विश्वासाची नवी व्याख्या निर्माण करणारी प्रगत प्रणाली.</p>
+  </div>
+</section>
+
+<div class="container">
+
+  <!-- Mission Banner -->
+  <div class="card" style="background:linear-gradient(135deg, #FFF7ED 0%, #FFEDD5 100%);border-color:#FDBA74;margin-bottom:32px;">
+    <h2 style="font-size:1.5rem;font-weight:800;color:#9A3412;margin-bottom:8px;">🎯 आमचे ध्येय</h2>
+    <p style="font-size:1.05rem;color:#7C2D12;line-height:1.7;">
+      पारंपरिक किराणा दुकानांमध्ये खरेदी करताना अनेकदा चुकीच्या किमती, गणनेतील त्रुटी किंवा भाववाढीची अस्पष्टता जाणवते. 
+      <strong>स्मार्ट किराणा एंटरप्राइज</strong> ही समस्या अत्याधुनिक तंत्रज्ञानाने सोडवते — घरगुती यादीचे AI शुद्धीकरण, दुकानदाराची रिव्हर्स बिलिंग पद्धत, मागील दरांचे ऑडिट आणि अचूक UPI पेमेंट यांचे एकत्रित व्यासपीठ.
+    </p>
+  </div>
+
+  <!-- 4 Pillars Section Header -->
+  <div style="text-align:center;margin-bottom:32px;">
+    <h2 style="font-size:1.8rem;font-weight:800;color:#1E293B;margin-bottom:6px;">स्मार्ट किराणाचे ४ मूलभूत आधारस्तंभ</h2>
+    <p style="color:#64748B;font-size:1rem;">तांत्रिक कार्यप्रणाली (System Architecture & Retail Workflow)</p>
+  </div>
+
+  <!-- 4 Pillars Grid -->
+  <div class="workflow-grid">
+    <!-- Pillar 1: AI Remediation -->
+    <div class="pillar-card">
+      <div class="pillar-badge-num">१</div>
+      <h3 class="pillar-title">AI यादी शुद्धीकरण (Gemini API)</h3>
+      <p class="pillar-desc">
+        ग्राहकांनी घाईघाईत टाईप केलेल्या अशुद्ध किंवा जोडलेल्या शब्दांचे (उदा. <code>साखर२किलो</code>, <code>shengdanatel2L</code>, <code>तुरीची डाल</code>) मानकीकृत मराठी कॅटलॉग नामांमध्ये अचूक रूपांतर केले जाते.
+      </p>
+      <div class="pillar-tech-highlight">
+        ⚙️ <strong>तंत्रज्ञान:</strong> Google Gemini 2.5 Flash + Deterministic Validator (V1-V7) + Local Regex Fallback.
+      </div>
+    </div>
+
+    <!-- Pillar 2: Reverse POS Calculation -->
+    <div class="pillar-card">
+      <div class="pillar-badge-num">२</div>
+      <h3 class="pillar-title">रिव्हर्स बिलिंग पद्धत (Reverse POS)</h3>
+      <p class="pillar-desc">
+        दुकानदाराला प्रत्येक वस्तूचा प्रति युनिट दर विचारण्याऐवजी, तो केवळ एकूण रक्कम (₹) भरतो. सिस्टीम तत्काळ प्रमाणानुसार अचूक युनिट दर <code>(एकूण रक्कम ÷ प्रमाण)</code> काढते.
+      </p>
+      <div class="pillar-tech-highlight">
+        ⚙️ <strong>तंत्रज्ञान:</strong> &lt;20 ms रिअल-टाइम इनपुट इव्हेंट कॅल्क्युलेटर, दशांश अचूकता, झिरो-मॅथ त्रुटी.
+      </div>
+    </div>
+
+    <!-- Pillar 3: Historical Volatility Engine -->
+    <div class="pillar-card">
+      <div class="pillar-badge-num">३</div>
+      <h3 class="pillar-title">भाववाढ व बजेट ऑडिट (Rolling Median)</h3>
+      <p class="pillar-desc">
+        आजचा दर ग्राहक घराण्याने गेल्या ५ फेऱ्यांमध्ये भरलेल्या मध्यक दराशी (Rolling Median) पडताळला जातो. त्यानुसार <code>संतुलित</code>, <code>भाववाढ</code>, <code>स्वस्त</code> किंवा <code>नवीन नोंद</code> हे स्टेटस बिल्स दिले जातात.
+      </p>
+      <div class="pillar-tech-highlight">
+        ⚙️ <strong>तंत्रज्ञान:</strong> PostgreSQL Rolling Medians, वेटेड बास्केट व्हेरिएन्स, महागाई इशारा.
+      </div>
+    </div>
+
+    <!-- Pillar 4: Zero-Keying UPI Dispatch -->
+    <div class="pillar-card">
+      <div class="pillar-badge-num">४</div>
+      <h3 class="pillar-title">सुरक्षित शून्य-कीईंग QR पेमेंट</h3>
+      <p class="pillar-desc">
+        दुकानदाराचा QR स्कॅन करताच एकूण देय रक्कम आपोआप UPI लिंकमध्ये सुरक्षितपणे इंजेक्ट केली जाते. ग्राहकाला रक्कम टाईप करावी लागत नाही, ज्यामुळे जास्त पैसे जाण्याची शक्यता शून्य होते.
+      </p>
+      <div class="pillar-tech-highlight">
+        ⚙️ <strong>तंत्रज्ञान:</strong> WebRTC MediaDevices, BarcodeDetector API, NPCI UPI Deep-linking.
+      </div>
+    </div>
+  </div>
+
+  <!-- Traditional vs Smart Kirana Comparison -->
+  <div style="margin-top:40px;margin-bottom:36px;">
+    <h2 style="font-size:1.6rem;font-weight:800;text-align:center;margin-bottom:24px;">
+      पारंपरिक किराणा खरेदी विरुद्ध स्मार्ट किराणा
+    </h2>
+
+    <div class="compare-container">
+      <!-- Traditional -->
+      <div class="compare-card traditional">
+        <h3 style="color:#C2410C;">❌ पारंपरिक पद्धत</h3>
+        <ul class="compare-list">
+          <li>❌ कागदावर लिहिलेली किंवा फोनवरील अशुद्ध यादी वाचताना गोंधळ.</li>
+          <li>❌ दुकानदार तोंडी सांगत असलेला दर ग्राहकाला पडताळता येत नाही.</li>
+          <li>❌ कॅल्क्युलेटरवर बेरीज करताना चुका किंवा वाढीव हिशोब होण्याचा धोका.</li>
+          <li>❌ मागील महिन्याच्या तुलनेत वस्तू महाग झाली की स्वस्त, याचा अंदाज नसतो.</li>
+          <li>❌ QR स्कॅन केल्यावर ग्राहकाला मोबाईलवर स्वतः रक्कम भरावी लागते.</li>
+        </ul>
+      </div>
+
+      <!-- Smart Kirana -->
+      <div class="compare-card smart">
+        <h3 style="color:#15803D;">✅ स्मार्ट किराणा एंटरप्राइज</h3>
+        <ul class="compare-list">
+          <li>✅ Gemini AI द्वारे अचूक मराठी कॅटलॉग नावे व प्रमाणाचे वर्गीकरण.</li>
+          <li>✅ दुकानदाराच्या एकूण रकमेवरून थेट अचूक प्रति युनिट दर उपलब्ध.</li>
+          <li>✅ गेल्या ५ खरेदींच्या आधारे भाववाढ किंवा बचत तत्काळ स्क्रीनवर दृश्यमान.</li>
+          <li>✅ संपूर्ण कुटुंबाचा एकत्रित पारदर्शक खरेदी इतिहास व डिजिटल पावती.</li>
+          <li>✅ शून्य-कीईंग UPI: अचूक ग्रँड टोटल थेट पेमेंट अ‍ॅपमध्ये पाठवले जाते.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- Security & Privacy Card -->
+  <div class="card" style="background:#0F172A;color:#FFFFFF;border:none;">
+    <div style="display:flex;align-items:center;gap:14px;margin-bottom:14px;">
+      <img src="/static/img/shield-badge.svg" alt="सुरक्षा" style="width:40px;height:40px;">
+      <h3 style="font-size:1.35rem;font-weight:700;">डेटा गोपनीयता व सुरक्षिततेची हमी</h3>
+    </div>
+    <p style="font-size:0.95rem;color:#94A3B8;line-height:1.7;margin-bottom:16px;">
+      स्मार्ट किराणा प्लॅटफॉर्मवर ग्राहकांच्या गोपनीयतेचे सर्वोच्च संरक्षण केले जाते. 
+      <strong>कॅमेरा फ्रेम्स कधीही सर्व्हरवर सेव्ह किंवा पाठवल्या जात नाहीत</strong>; QR कोड थेट आपल्या डिव्हाइसवर डिकोड होतो. 
+      तसेच AI कडे केवळ किराणा वस्तूंची नावे पाठवली जातात — कोणताही वैयक्तिक डेटा, फोन नंबर किंवा आर्थिक माहिती Google सर्व्हरवर जात नाही. 
+      ही प्रणाली भारतीय DPDP कायदा २०२३ च्या मार्गदर्शक तत्त्वांशी पूर्णपणे सुसंगत आहे.
+    </p>
+  </div>
+
+</div>
+{% endblock %}

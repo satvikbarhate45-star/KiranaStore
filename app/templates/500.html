@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container py-5 text-center my-5" style="max-width: 650px;">
+  <div class="card p-5 shadow-sm border-0 rounded-4">
+    <div class="mb-4">
+      <span style="font-size: 4rem;">⚙️</span>
+    </div>
+    <h1 class="display-6 fw-bold text-danger mb-3">सर्व्हरवर तात्पुरती अडचण आली आहे</h1>
+    <h4 class="text-secondary mb-4">(500 - Internal Server Error)</h4>
+    <p class="lead text-muted mb-4">
+      सर्व्हरवर काही अनपेक्षित तांत्रिक अडचण निर्माण झाली आहे. आमची टीम ही समस्या सोडवण्यासाठी काम करत आहे. कृपया काही क्षणांनी पुन्हा प्रयत्न करा.
+    </p>
+    <div class="d-flex justify-content-center gap-3">
+      <a href="/" class="btn btn-primary px-4 py-2 rounded-pill fw-semibold" style="background:#FF6A00;border-color:#FF6A00;">
+        🏠 मुख्यपृष्ठावर जा
+      </a>
+      <a href="/contact/" class="btn btn-outline-secondary px-4 py-2 rounded-pill fw-semibold">
+        📞 मदत व संपर्क
+      </a>
+    </div>
+  </div>
+</div>
+{% endblock %}

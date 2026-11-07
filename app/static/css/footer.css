@@ -1,0 +1,160 @@
+/* ==============================================================================
+   Footer Stylesheet
+   Professional Marathi Enterprise Footer & Consumer Safety Badges
+============================================================================== */
+
+.site-footer {
+  background: #0F172A;
+  color: #E2E8F0;
+  padding: 56px 0 24px;
+  margin-top: 60px;
+  border-top: 3px solid var(--primary-saffron);
+}
+
+.footer-grid {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1.5fr;
+  gap: 40px;
+  margin-bottom: 40px;
+}
+
+/* Brand Section */
+.footer-brand {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.footer-brand-title {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 1.45rem;
+  font-weight: 800;
+  color: #FFFFFF;
+}
+
+.footer-brand-title img {
+  width: 38px;
+  height: 38px;
+  border-radius: 8px;
+}
+
+.footer-desc {
+  font-size: 0.95rem;
+  color: #94A3B8;
+  line-height: 1.7;
+  max-width: 440px;
+}
+
+/* Quick Links */
+.footer-heading {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #FFFFFF;
+  margin-bottom: 18px;
+  position: relative;
+  padding-bottom: 8px;
+}
+
+.footer-heading::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 32px;
+  height: 2.5px;
+  background: var(--primary-saffron);
+  border-radius: 2px;
+}
+
+.footer-links {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.footer-links a {
+  color: #94A3B8;
+  font-size: 0.95rem;
+  transition: all 0.2s;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.footer-links a:hover {
+  color: var(--primary-saffron);
+  transform: translateX(4px);
+}
+
+/* Safety Badges Column */
+.footer-safety {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.safety-badge-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: rgba(30, 41, 59, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  padding: 12px 14px;
+  border-radius: var(--radius-md);
+}
+
+.safety-badge-card img {
+  width: 32px;
+  height: 32px;
+  flex-shrink: 0;
+}
+
+.safety-badge-text strong {
+  display: block;
+  font-size: 0.9rem;
+  color: #FFFFFF;
+}
+
+.safety-badge-text span {
+  font-size: 0.8rem;
+  color: #94A3B8;
+}
+
+/* Helpdesk Info */
+.footer-helpdesk {
+  background: rgba(255, 106, 0, 0.1);
+  border: 1px solid rgba(255, 106, 0, 0.25);
+  border-radius: var(--radius-md);
+  padding: 12px 16px;
+  margin-top: 10px;
+  font-size: 0.9rem;
+  color: #FFB74D;
+}
+
+/* Footer Bottom Bar */
+.footer-bottom {
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  padding-top: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 0.85rem;
+  color: #64748B;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.footer-bottom strong {
+  color: #CBD5E1;
+}
+
+/* Responsive Footer */
+@media (max-width: 900px) {
+  .footer-grid {
+    grid-template-columns: 1fr;
+    gap: 32px;
+  }
+}

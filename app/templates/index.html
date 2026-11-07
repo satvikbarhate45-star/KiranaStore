@@ -1,0 +1,544 @@
+{% extends "base.html" %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="/static/css/home.css?v={{ time }}">
+{% endblock %}
+
+{% block content %}
+<!-- Page Hero -->
+<section class="page-hero">
+  <div class="container">
+    <h1>🛒 मुख्य बिलिंग व यादी शुद्धीकरण पोर्टल</h1>
+    <p>घरगुती किराणा यादी सबमिट करा, Gemini AI द्वारे आपोआप शुद्ध करा, दुकानदाराची एकूण रक्कम नोंदवून त्वरित दर तपासा आणि शून्य-कीईंग UPI ने व्यवहार पूर्ण करा.</p>
+  </div>
+</section>
+
+<div class="container">
+
+  <!-- Festival Surge Predictor Alert Card (MODULE 6) -->
+  <div id="festival-surge-banner" class="festival-surge-card" style="display:none;background:linear-gradient(135deg, #FFFBEB 0%, #FEF3C7 100%);border:1px solid #F59E0B;border-radius:12px;padding:14px 18px;margin-bottom:20px;box-shadow:0 2px 6px rgba(245,158,11,0.15);">
+    <div style="display:flex;align-items:flex-start;gap:12px;">
+      <span style="font-size:1.6rem;line-height:1;">💡</span>
+      <div style="flex:1;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;flex-wrap:wrap;gap:8px;">
+          <strong id="fest-surge-title" style="color:#92400E;font-size:1rem;">सणासुदीचा स्मार्ट खरेदी सल्ला</strong>
+          <span id="fest-days-badge" style="background:#FDE68A;color:#78350F;font-size:0.75rem;padding:2px 8px;border-radius:10px;font-weight:700;">आगामी उत्सव</span>
+        </div>
+        <p id="fest-surge-text" style="color:#78350F;font-size:0.92rem;margin:0 0 6px 0;font-weight:600;line-height:1.5;"></p>
+        <div id="fest-surge-chips" style="display:flex;gap:6px;flex-wrap:wrap;font-size:0.8rem;color:#92400E;"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="home-layout">
+    
+    <!-- Left Column: Ingestion Panel -->
+    <aside class="ingestion-panel">
+      <div class="card">
+        
+        <!-- Fast Catalog Access Pill -->
+        <div style="margin-bottom:14px;">
+          <a href="/catalog" class="btn btn-secondary btn-sm" style="width:100%;font-weight:700;display:flex;align-items:center;justify-content:center;gap:6px;background:#F0FDFA;color:#0F766E;border:1.5px solid #99F6E4;">
+            🛍️ स्वतंत्र किराणा कॅटलॉग उघडा (Point & Click) ➔
+          </a>
+        </div>
+
+        <!-- Pathway A: Unstructured Text Form -->
+        <div id="pathway-text-section">
+          <h2 class="card-title" style="font-size:1.1rem;margin-bottom:6px;">📝 किराणा यादी सबमिशन</h2>
+          <p style="font-size:0.85rem;color:#64748B;margin-bottom:12px;">
+            एका ओळीवर एक वस्तू लिहा. स्पेलिंग चुका, रोमन इंग्रजी किंवा 'साखर२किलो' अशी एकत्रित वाक्ये AI आपोआप ओळखते.
+          </p>
+
+          <!-- Quick Sample Buttons -->
+          <div class="sample-pills">
+            <button type="button" class="sample-btn" data-sample="sample1">✨ नमुना १ (मिसळलेले)</button>
+            <button type="button" class="sample-btn" data-sample="sample2">📋 नमुना २ (स्वच्छ यादी)</button>
+            <button type="button" class="sample-btn" data-sample="sample3">🌿 नमुना ३ (मसाले व इतर)</button>
+          </div>
+
+          <form id="list-ingestion-form">
+            <div class="form-group">
+              <textarea 
+                id="raw-list-input" 
+                class="form-control" 
+                placeholder="उदा.&#10;mitha 10rupees&#10;साखर२किलो&#10;20 rs kothimbir&#10;तांदूळ 500 gm&#10;चहा पावडर अर्धा किलो"
+                rows="7"
+              ></textarea>
+            </div>
+
+            <div style="display:flex;gap:8px;align-items:center;">
+              <button type="submit" id="parse-list-btn" class="btn btn-primary" style="flex:1;">
+                ✨ यादी शुद्ध करा व काउंटरवर पाठवा
+              </button>
+              <button type="button" id="btn-open-camera-options" class="btn btn-warning rounded-circle shadow-sm p-0 d-inline-flex align-items-center justify-content-center" style="width: 42px; height: 42px; min-width: 42px;" title="पावती / यादीचा फोटो काढा किंवा निवडा">
+                <i class="bi bi-camera-fill fs-5 text-dark"></i>
+              </button>
+            </div>
+            
+            <div style="display:flex;gap:8px;margin-top:10px;">
+              <button type="button" id="save-draft-btn" class="btn btn-secondary btn-sm" style="flex:1;" title="यादी स्थानिक व डेटाबेसमध्ये ड्राफ्ट म्हणून साठवा">
+                💾 यादी सेव्ह करा
+              </button>
+              <button type="button" id="open-drafts-btn" class="btn btn-secondary btn-sm" style="flex:1;" title="जतन केलेल्या याद्या पहा व रिस्टोर करा">
+                📂 सेव्ह केलेल्या याद्या
+              </button>
+            </div>
+          </form>
+        </div>
+
+        <!-- Pipeline Status / Fallback Notice -->
+        <div id="pipeline-alert" class="pipeline-alert" style="display:none;"></div>
+      </div>
+
+      <!-- Merchant Store Profile Card -->
+      <div class="card">
+        <h3 class="card-title" style="font-size:1.1rem;">🏪 किराणा स्टोअर माहिती</h3>
+        <div class="form-group" style="margin-bottom:10px;">
+          <label class="form-label" style="font-size:0.85rem;">दुकानदाराचे नाव:</label>
+          <input type="text" id="merchant-name-input" class="form-control" value="पाटील सुपर किराणा स्टोअर्स">
+        </div>
+        <div class="form-group" style="margin-bottom:0;">
+          <label class="form-label" style="font-size:0.85rem;">दुकानदार UPI ID:</label>
+          <input type="text" id="merchant-vpa-input" class="form-control" value="patil.kirana@upi">
+        </div>
+      </div>
+    </aside>
+
+    <!-- Right Column: Reverse Calculation Billing Grid -->
+    <section class="billing-grid-card">
+      <div class="card" style="min-height:540px;">
+        <div class="grid-header-actions">
+          <div>
+            <h2 class="card-title" style="margin-bottom:4px;">⚖️ दुकानदार बिलिंग काउंटर (Reverse POS)</h2>
+            <p style="font-size:0.88rem;color:#64748B;">दुकानदाराने प्रत्येक वस्तूची केवळ <strong>एकूण रक्कम (₹)</strong> भरावी; सिस्टीम आजचा युनिट दर त्वरित काढेल.</p>
+          </div>
+        </div>
+
+        <!-- Empty State -->
+        <div id="grid-empty-state" class="empty-state">
+          <div class="empty-state-icon">📋</div>
+          <h3>काउंटरवर कोणतीही वस्तू नाही</h3>
+          <p>डाव्या बाजूला किराणा यादी सबमिट करा किंवा नमुना बटणावर क्लिक करा.</p>
+        </div>
+
+        <!-- Processing Skeleton Loader (Zero-CLS during AI optimization) -->
+        <div id="grid-loading-skeleton" class="skeleton-wrap" style="display:none;">
+          <div class="processing-status-card">
+            <div class="processing-indicator">
+              <div class="processing-spinner"></div>
+              <div class="processing-text">
+                <strong id="processing-title">🤖 कृत्रिम बुद्धिमत्ता यादी शुद्ध करत आहे...</strong>
+                <span id="processing-subtitle">स्पेलिंग चुका, ब्रँड पृथक्करण व वस्तू वर्गीकरण सुरू आहे (AI optimization in progress)...</span>
+              </div>
+            </div>
+            <div class="processing-progress-bar">
+              <div id="processing-progress-fill" class="processing-progress-fill"></div>
+            </div>
+          </div>
+
+          <div class="skeleton-table">
+            <div class="skeleton-header-row">
+              <div class="skeleton-pill" style="width:38%;"></div>
+              <div class="skeleton-pill" style="width:16%;"></div>
+              <div class="skeleton-pill" style="width:18%;"></div>
+              <div class="skeleton-pill" style="width:18%;"></div>
+              <div class="skeleton-pill" style="width:10%;"></div>
+            </div>
+            <div class="skeleton-row"><div class="skeleton-bar" style="width:38%;"></div><div class="skeleton-bar" style="width:16%;"></div><div class="skeleton-bar" style="width:18%;"></div><div class="skeleton-bar" style="width:18%;"></div><div class="skeleton-bar" style="width:10%;"></div></div>
+            <div class="skeleton-row"><div class="skeleton-bar" style="width:38%;"></div><div class="skeleton-bar" style="width:16%;"></div><div class="skeleton-bar" style="width:18%;"></div><div class="skeleton-bar" style="width:18%;"></div><div class="skeleton-bar" style="width:10%;"></div></div>
+            <div class="skeleton-row"><div class="skeleton-bar" style="width:38%;"></div><div class="skeleton-bar" style="width:16%;"></div><div class="skeleton-bar" style="width:18%;"></div><div class="skeleton-bar" style="width:18%;"></div><div class="skeleton-bar" style="width:10%;"></div></div>
+            <div class="skeleton-row"><div class="skeleton-bar" style="width:38%;"></div><div class="skeleton-bar" style="width:16%;"></div><div class="skeleton-bar" style="width:18%;"></div><div class="skeleton-bar" style="width:18%;"></div><div class="skeleton-bar" style="width:10%;"></div></div>
+          </div>
+        </div>
+
+        <!-- Table Wrap -->
+        <div id="grid-table-wrap" class="table-responsive" style="display:none;">
+          <table class="table counter-table">
+            <thead>
+              <tr>
+                <th class="th-name" style="width: 38%;">वस्तूचे नाव</th>
+                <th class="th-qty" style="width: 16%;">प्रमाण</th>
+                <th class="th-rate" style="width: 18%;">दर / युनिट</th>
+                <th class="th-amount" style="width: 18%;">एकूण रक्कम ₹</th>
+                <th class="th-check" style="width: 10%;">✓ दिला</th>
+              </tr>
+            </thead>
+            <tbody id="counter-table-body">
+              <!-- Dynamically populated via home.js -->
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Sticky Billing Total Footer -->
+        <div id="sticky-billing-footer" class="sticky-billing-footer" style="display:none;">
+          <div class="footer-total-box">
+            <span class="footer-total-label">एकूण देय रक्कम (Grand Total)</span>
+            <span id="footer-grand-total" class="footer-grand-total">₹0.00</span>
+          </div>
+
+          <div id="footer-basket-status" class="footer-basket-status">
+            <!-- Volatility basket pill -->
+          </div>
+
+          <div class="footer-actions">
+            <button id="pay-qr-btn" class="btn btn-primary btn-lg" disabled>
+              📱 दुकानदाराचा QR स्कॅन करा
+            </button>
+            <button id="commit-trip-btn" class="btn btn-success btn-lg" disabled>
+              💾 डेटाबेस हिस्ट्रीमध्ये सेव्ह करा
+            </button>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+  </div>
+</div>
+
+<!-- Intermediate Verification & Edit Modal ("किराणा यादी पडताळणी व संपादन" - MODULE 4) -->
+<div id="verification-modal" class="modal-overlay">
+  <div class="modal-content verification-modal-content" style="max-width:880px;">
+    
+    <!-- Modal Header -->
+    <div class="modal-header verification-modal-header" style="padding:14px 20px;">
+      <div class="v-header-title-box">
+        <h3 id="verification-modal-title" style="margin:0;font-size:1.2rem;">📋 किराणा यादी पडताळणी व संपादन</h3>
+      </div>
+      <button id="close-verification-modal" class="modal-close" aria-label="बंद करा">✕</button>
+    </div>
+
+    <!-- Pinned Sticky Header Toolbar (MODULE 4) -->
+    <div class="v-sticky-toolbar" style="position:sticky;top:0;z-index:20;background:#FFFFFF;border-bottom:2px solid #E2E8F0;padding:10px 20px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;box-shadow:0 2px 4px rgba(0,0,0,0.04);">
+      <!-- Left: Reconciliation Badge -->
+      <div id="v-reconciliation-badge" class="v-reconciliation-badge" style="font-size:0.88rem;font-weight:700;color:#0F766E;background:#CCFBF1;border:1px solid #99F6E4;padding:5px 14px;border-radius:20px;display:flex;align-items:center;gap:6px;">
+        <span style="font-size:1.1rem;">⚖️</span>
+        <span id="v-reconciliation-text">एकूण इनपुट ओळी: ० | फॉर्ममधील वस्तू: ०</span>
+      </div>
+
+      <!-- Right: Fixed Action to insert blank row at Row 0 without scrolling -->
+      <button type="button" id="v-add-row-top-btn" class="btn btn-secondary btn-sm" style="font-weight:700;background:#0F766E;color:#FFFFFF;border:none;padding:6px 14px;border-radius:6px;cursor:pointer;">
+        ➕ नवीन वस्तू जोडा (Row 0)
+      </button>
+    </div>
+
+    <div class="modal-body verification-modal-body" style="padding:16px 20px;">
+      <div class="v-instruction-box" style="margin-bottom:12px;background:#F8FAFC;padding:8px 14px;border-radius:8px;font-size:0.85rem;color:#475569;">
+        वस्तूचे नाव (ब्रँडसह), प्रमाण किंवा एकक थेट खालील फील्डमध्ये बदला. '🗑️' आयकॉनने वस्तू काढू शकता.
+      </div>
+
+      <div class="v-table-wrapper" id="v-table-wrapper" style="max-height:420px;overflow-y:auto;overflow-x:auto;-webkit-overflow-scrolling:touch;width:100%;border:1px solid #E2E8F0;border-radius:8px;">
+        <table class="table v-table" id="v-table" style="margin-bottom:0;min-width:540px;width:100%;">
+          <thead style="position:sticky;top:0;background:#F1F5F9;z-index:15;">
+            <tr>
+              <th class="v-th-sr" style="width:40px;">क्र.</th>
+              <th class="v-th-name">वस्तूचे नाव व ब्रँड</th>
+              <th class="v-th-qty" style="width:110px;">प्रमाण</th>
+              <th class="v-th-unit" style="width:105px;">एकक</th>
+              <th class="v-th-price" style="width:110px;">अंदाजे ₹</th>
+              <th class="v-th-action" style="width:50px;text-align:center;">क्रिया</th>
+            </tr>
+          </thead>
+          <tbody id="v-table-body">
+            <!-- Dynamically populated via home.js -->
+          </tbody>
+        </table>
+      </div>
+
+      <div class="v-table-bottom-bar" style="margin-top:10px;display:flex;justify-content:space-between;align-items:center;">
+        <button type="button" id="v-add-row-btn" class="btn btn-secondary btn-sm">
+          ➕ शेवटी वस्तू जोडा
+        </button>
+        <span id="v-count-status-note" class="v-count-status-note" style="font-size:0.84rem;color:#64748B;">एकूण वस्तू: ०/०</span>
+      </div>
+    </div>
+
+    <div class="modal-footer verification-modal-footer" style="padding:12px 20px;border-top:1px solid #E2E8F0;display:flex;justify-content:flex-end;gap:10px;">
+      <button type="button" id="v-save-draft-btn" class="btn btn-secondary" title="यादी कायमस्वरूपी जतन करा">
+        💾 यादी सेव्ह करा
+      </button>
+      <button type="button" id="v-cancel-btn" class="btn btn-secondary">
+        रद्द करा
+      </button>
+      <button type="button" id="v-confirm-btn" class="btn btn-primary btn-confirm-send" style="background:#0F766E;border-color:#0F766E;">
+        🛒 थेट काउंटरला पाठवा
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Duplicate Item Prompt Modal (MODULE 4) -->
+<div id="duplicate-prompt-modal" class="modal-overlay" style="z-index:1100;">
+  <div class="modal-content" style="max-width:440px;text-align:center;">
+    <div class="modal-body" style="padding:28px 24px;">
+      <div style="font-size:2.8rem;margin-bottom:10px;">⚠️</div>
+      <h3 style="font-size:1.2rem;font-weight:700;color:#1E293B;margin-bottom:8px;">दुबार नोंद आढळली!</h3>
+      <p id="duplicate-prompt-message" style="font-size:0.92rem;color:#475569;margin-bottom:22px;line-height:1.5;">
+        <!-- Injected dynamically -->
+      </p>
+      <div style="display:flex;gap:10px;justify-content:center;">
+        <button type="button" id="duplicate-confirm-btn" class="btn btn-primary" style="flex:1;">
+          ➕ होय, पुन्हा जोडा
+        </button>
+        <button type="button" id="duplicate-reject-btn" class="btn btn-secondary" style="flex:1;">
+          ❌ नको, रद्द करा
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Dedicated Saved Lists Drawer / Modal ("📂 सेव्ह केलेल्या याद्या" - MODULE 5) -->
+{% include "saved_lists_modal.html" %}
+
+
+<!-- WebRTC QR Scanner Modal -->
+<div id="qr-modal" class="modal-overlay">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h3>📷 दुकानदाराचा UPI QR स्कॅन करा</h3>
+      <button id="close-qr-modal" class="modal-close">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="scanner-viewport">
+        <video id="qr-video" class="scanner-video" playsinline webkit-playsinline muted autoplay></video>
+        <div class="scanner-reticle">
+          <div class="scanner-laser"></div>
+        </div>
+      </div>
+      <p style="text-align:center;font-size:0.85rem;color:#64748B;margin-top:10px;">
+        कॅमेरा दुकानदाराच्या फोनपे, गुगलपे किंवा भारतपे QR कोडसमोर धरा.
+      </p>
+
+      <div class="scanner-options">
+        <label class="btn btn-secondary btn-sm" style="width:100%;text-align:center;cursor:pointer;">
+          📁 गॅलरीमधून QR फोटो निवडा
+          <input type="file" id="qr-file-input" accept="image/*" capture="environment" style="display:none;">
+        </label>
+
+        <!-- Manual VPA Fallback Form -->
+        <form id="manual-vpa-form" style="display:flex;gap:8px;margin-top:8px;">
+          <input type="text" id="manual-vpa-input" class="form-control" placeholder="किंवा थेट UPI आयडी टाका (उदा. shop@upi)" />
+          <button type="submit" class="btn btn-primary btn-sm" style="white-space:nowrap;">भरणा करा</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Post-Payment Confirmation Modal -->
+<div id="payment-confirm-modal" class="modal-overlay">
+  <div class="modal-content" style="max-width:440px;text-align:center;">
+    <div class="modal-body" style="padding:32px 24px;">
+      <div style="font-size:3rem;margin-bottom:12px;">💸</div>
+      <h3 style="font-size:1.35rem;font-weight:700;margin-bottom:8px;">पेमेंट यशस्वी झाले का?</h3>
+      <p style="font-size:0.95rem;color:#64748B;margin-bottom:24px;">
+        आपल्या UPI अ‍ॅपमध्ये व्यवहार यशस्वी झाला असल्यास पुष्टी करा. त्यानंतर ही खरेदी डेटाबेसमध्ये नोंदवली जाईल.
+      </p>
+      <div style="display:flex;gap:12px;justify-content:center;">
+        <button id="payment-confirm-yes" class="btn btn-success btn-lg">
+          ✅ होय, पेमेंट झाले
+        </button>
+        <button id="payment-confirm-no" class="btn btn-secondary btn-lg">
+          ❌ नाही / अपूर्ण
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Receipt Modal -->
+<div id="receipt-modal" class="modal-overlay">
+  <div class="modal-content" style="max-width:620px;">
+    <div class="modal-header">
+      <h3>🧾 खरेदी पावती (Receipt)</h3>
+      <button id="close-receipt-modal" class="modal-close">✕</button>
+    </div>
+    <div class="modal-body">
+      <div id="receipt-preview-content" class="receipt-preview-box">
+        <!-- Injected via home.js -->
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Handwritten / Printed Grocery Slip Scanner Selection Modal -->
+<div id="photoSourceModal" class="modal-overlay" style="display:none; z-index:2100;">
+  <div class="modal-content" style="max-width: 440px; padding: 0; border-radius: 16px; overflow: hidden; box-shadow: 0 10px 25px rgba(0,0,0,0.2);">
+    <div class="modal-header d-flex justify-content-between align-items-center" style="background:#F8FAFC; padding:16px 20px; border-bottom:1px solid #E2E8F0; display:flex; justify-content:space-between; align-items:center;">
+      <h3 style="margin:0; font-size:1.15rem; font-weight:700; color:#1E293B;">📷 यादीचा फोटो कसा घ्यायचा?</h3>
+      <button type="button" id="close-photo-modal" class="modal-close" style="background:none; border:none; font-size:1.25rem; cursor:pointer; color:#64748B;">✕</button>
+    </div>
+    <div class="modal-body" style="padding:24px 20px;">
+      <p style="font-size:0.9rem; color:#64748B; margin-bottom:18px;">
+        हाताने लिहिलेल्या किंवा छापलेल्या किराणा यादीचा फोटो द्या. Gemini AI सर्व वस्तू आपोआप ओळखेल.
+      </p>
+      
+      <button type="button" id="btn-action-camera" class="btn btn-outline-primary w-100 py-3 mb-2 fw-bold d-flex align-items-center justify-content-center" style="font-size:1rem; border-radius:10px; border:2px solid #0284C7; color:#0369A1; background:#F0F9FF; transition:all 0.2s; width:100%; padding:14px; margin-bottom:12px; cursor:pointer;">
+        <i class="bi bi-camera me-2 fs-5"></i> थेट कॅमेऱ्याने फोटो काढा
+      </button>
+
+      <button type="button" id="btn-action-gallery" class="btn btn-outline-secondary w-100 py-3 fw-bold d-flex align-items-center justify-content-center" style="font-size:1rem; border-radius:10px; border:2px solid #94A3B8; color:#334155; background:#F8FAFC; transition:all 0.2s; width:100%; padding:14px; cursor:pointer;">
+        <i class="bi bi-image me-2 fs-5"></i> गॅलरीतून फोटो निवडा
+      </button>
+
+      <!-- Hidden file inputs -->
+      <input type="file" id="camera-capture-input" accept="image/*" capture="environment" class="d-none" style="display:none;">
+      <input type="file" id="gallery-file-input" accept="image/*" class="d-none" style="display:none;">
+    </div>
+  </div>
+</div>
+
+<!-- Live Webcam Viewfinder Modal for Desktop -->
+<div id="liveCameraModal" data-alias="webcamLiveModal" class="modal-overlay" style="display:none; z-index:2150;">
+  <div class="modal-content" style="max-width: 560px; width: 95%; padding: 0; border-radius: 16px; overflow: hidden; box-shadow: 0 12px 36px rgba(0,0,0,0.3);">
+    <div class="modal-header d-flex justify-content-between align-items-center" style="background:#F8FAFC; padding:14px 20px; border-bottom:1px solid #E2E8F0; display:flex; justify-content:space-between; align-items:center;">
+      <div style="display:flex; align-items:center; gap:8px;">
+        <span style="font-size:1.3rem;">📸</span>
+        <h3 style="margin:0; font-size:1.15rem; font-weight:700; color:#1E293B;">थेट कॅमेऱ्याने फोटो काढा</h3>
+      </div>
+      <button type="button" id="close-webcam-modal" class="modal-close" style="background:none; border:none; font-size:1.25rem; cursor:pointer; color:#64748B;">✕</button>
+    </div>
+    <div class="modal-body" style="padding:16px; background:#0F172A; text-align:center;">
+      <div style="position:relative; width:100%; border-radius:12px; overflow:hidden; background:#000; min-height:280px; display:flex; align-items:center; justify-content:center;">
+        <video id="webcam-video-feed" playsinline autoplay muted style="width:100%; max-height:360px; object-fit:contain; display:block;"></video>
+      </div>
+      <canvas id="webcam-snapshot-canvas" style="display:none;"></canvas>
+    </div>
+    <div class="modal-footer" style="padding:14px 20px; border-top:1px solid #E2E8F0; display:flex; justify-content:space-between; align-items:center; background:#F8FAFC;">
+      <button type="button" id="btn-cancel-webcam" class="btn btn-secondary" style="border-radius:8px; padding:8px 16px; font-weight:600;">रद्द करा</button>
+      <button type="button" id="btn-capture-snapshot" class="btn btn-warning fw-bold" style="border-radius:8px; padding:10px 24px; font-weight:700; display:inline-flex; align-items:center; gap:8px;">
+        📸 फोटो काढा (Capture)
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Full-card / Global Processing Loader for Multimodal OCR -->
+<div id="photo-processing-loader" class="modal-overlay d-none" style="display:none; z-index:2200; background:rgba(15, 23, 42, 0.75); backdrop-filter:blur(6px);">
+  <div class="modal-content text-center" style="max-width:440px; border-radius:16px; background:#FFFFFF; padding:28px 24px; box-shadow:0 12px 32px rgba(0,0,0,0.25); text-align:center;">
+    <div style="font-size:3rem; margin-bottom:12px; animation: pulse-spinner 1.2s infinite ease-in-out;">
+      ⏳
+    </div>
+    <h4 style="font-size:1.15rem; font-weight:700; color:#1E293B; margin-bottom:8px;">🤖 AI व्हिजन स्कॅनिंग सुरू आहे...</h4>
+    <p style="font-size:0.92rem; color:#475569; margin:0; line-height:1.6; font-weight:500;">
+      ⏳ फोटोतील हाताने लिहिलेली यादी AI द्वारे वाचत आहे व वस्तू शुद्ध करत आहे... कृपया प्रतीक्षा करा.
+    </p>
+  </div>
+</div>
+
+<!-- Interactive Scanned Receipt Review & Budget Verification Modal (MODULE 3) -->
+<div id="scannedReceiptReviewModal" class="modal-overlay" style="display:none; z-index:2150;">
+  <div class="modal-content" style="max-width:840px; width:95%; border-radius:16px; overflow:hidden; box-shadow:0 12px 36px rgba(0,0,0,0.25);">
+    
+    <!-- Modal Header -->
+    <div class="modal-header" style="background:#F8FAFC; padding:16px 22px; border-bottom:1px solid #E2E8F0; display:flex; justify-content:space-between; align-items:center;">
+      <div style="display:flex; align-items:center; gap:10px;">
+        <span style="font-size:1.4rem;">🧾</span>
+        <div>
+          <h3 style="margin:0; font-size:1.15rem; font-weight:700; color:#1E293B;">स्कॅन केलेली पावती व बजेट पडताळणी</h3>
+          <span style="font-size:0.82rem; color:#64748B;">कृपया प्रसंग, खरेदी दिनांक, वस्तू, प्रमाण व पावतीवरील किमती तपासा किंवा संपादित करा.</span>
+        </div>
+      </div>
+      <button type="button" id="close-scanned-review-modal" class="modal-close" style="background:none; border:none; font-size:1.3rem; cursor:pointer; color:#64748B;">✕</button>
+    </div>
+
+    <!-- Occasion Titling, Categorization & Backdated Ingestion Bar (PILLAR 2) -->
+    <div style="background:#F8FAFC; border-bottom:1px solid #E2E8F0; padding:12px 22px;">
+      <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap:12px; align-items:center;">
+        <div>
+          <label style="display:block; font-size:0.8rem; font-weight:700; color:#475569; margin-bottom:4px;">यादीचे शीर्षक (Title):</label>
+          <input type="text" id="scanned-receipt-title" class="form-control" value="नियमित किराणा" placeholder="उदा. नियमित किराणा / दिवाळी फराळ" style="width:100%; padding:6px 10px; border-radius:6px; border:1px solid #CBD5E1; font-weight:600; font-size:0.9rem;">
+        </div>
+        <div>
+          <label style="display:block; font-size:0.8rem; font-weight:700; color:#475569; margin-bottom:4px;">प्रसंग / स्वरूप (Occasion):</label>
+          <select id="scanned-receipt-occasion" class="form-select" style="width:100%; padding:6px 10px; border-radius:6px; border:1px solid #CBD5E1; font-weight:600; font-size:0.9rem;">
+            <option value="regular" selected>नियमित किराणा (Regular)</option>
+            <option value="festive">दिवाळी / सण फराळ (Festive)</option>
+            <option value="guest_event">पाहुणचार / कार्यक्रम (Guest / Event)</option>
+            <option value="other">इतर खरेदी (Other)</option>
+          </select>
+        </div>
+        <div>
+          <label style="display:block; font-size:0.8rem; font-weight:700; color:#475569; margin-bottom:4px;">खरेदी दिनांक (Purchase Date):</label>
+          <input type="date" id="scanned-receipt-date" class="form-control" style="width:100%; padding:6px 10px; border-radius:6px; border:1px solid #CBD5E1; font-weight:600; font-size:0.9rem;">
+        </div>
+      </div>
+      <!-- Quick Suggestion Chips -->
+      <div style="display:flex; align-items:center; gap:8px; margin-top:8px; flex-wrap:wrap;">
+        <span style="font-size:0.75rem; color:#64748B; font-weight:600;">त्वरित निवडी:</span>
+        <button type="button" class="btn btn-sm occasion-chip" data-title="नियमित किराणा" data-occasion="regular" style="background:#E2E8F0; border:none; border-radius:12px; font-size:0.78rem; padding:2px 10px; cursor:pointer;">नियमित किराणा</button>
+        <button type="button" class="btn btn-sm occasion-chip" data-title="दिवाळी फराळ" data-occasion="festive" style="background:#FEF3C7; color:#92400E; border:none; border-radius:12px; font-size:0.78rem; padding:2px 10px; cursor:pointer;">दिवाळी फराळ</button>
+        <button type="button" class="btn btn-sm occasion-chip" data-title="पाहुणचार किराणा" data-occasion="guest_event" style="background:#E0E7FF; color:#3730A3; border:none; border-radius:12px; font-size:0.78rem; padding:2px 10px; cursor:pointer;">पाहुणचार</button>
+        <button type="button" class="btn btn-sm occasion-chip" data-title="लग्नकार्य सामान" data-occasion="guest_event" style="background:#FCE7F3; color:#9D174D; border:none; border-radius:12px; font-size:0.78rem; padding:2px 10px; cursor:pointer;">लग्नकार्य सामान</button>
+      </div>
+    </div>
+
+    <!-- Summary KPI Bar -->
+    <div style="background:#F0FDFA; border-bottom:1px solid #CCFBF1; padding:12px 22px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;">
+      <div style="display:flex; gap:18px; align-items:center; flex-wrap:wrap;">
+        <div style="font-size:0.92rem; font-weight:700; color:#0F766E;">
+          📋 एकूण वस्तू: <span id="review-total-items-badge" style="background:#CCFBF1; padding:3px 10px; border-radius:12px; font-weight:800; color:#0F766E;">०</span>
+        </div>
+        <div style="font-size:0.95rem; font-weight:700; color:#0F766E;">
+          💰 पावतीवरील एकूण रक्कम: <span id="review-grand-total-badge" style="font-size:1.15rem; color:#0F766E; font-weight:800;">₹0.00</span>
+        </div>
+      </div>
+      <button type="button" id="btn-add-review-row" class="btn btn-secondary btn-sm" style="font-weight:700; padding:6px 14px; border-radius:6px; cursor:pointer; background:#FFFFFF; border:1.5px solid #0F766E; color:#0F766E;">
+        ➕ नवीन वस्तू जोडा
+      </button>
+    </div>
+
+    <!-- Modal Body: Editable Table -->
+    <div class="modal-body" style="padding:16px 22px; max-height:420px; overflow-y:auto; overflow-x:auto;">
+      <table class="table" style="width:100%; border-collapse:collapse; min-width:580px;">
+        <thead style="position:sticky; top:0; background:#F1F5F9; z-index:10;">
+          <tr style="text-align:left; font-size:0.85rem; color:#475569; border-bottom:2px solid #CBD5E1;">
+            <th style="padding:10px 8px; width:45px;">क्र.</th>
+            <th style="padding:10px 8px; width:36%;">वस्तूचे नाव व ब्रँड</th>
+            <th style="padding:10px 8px; width:16%;">प्रमाण (Qty)</th>
+            <th style="padding:10px 8px; width:16%;">एकक (Unit)</th>
+            <th style="padding:10px 8px; width:22%;">किंमत ₹ (Price)</th>
+            <th style="padding:10px 8px; width:10%; text-align:center;">क्रिया</th>
+          </tr>
+        </thead>
+        <tbody id="scanned-review-table-body">
+          <!-- Dynamically populated via app.js -->
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Modal Footer: 3-Way Action Split (PILLAR 5) -->
+    <div class="modal-footer" style="padding:14px 22px; border-top:1px solid #E2E8F0; background:#F8FAFC; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
+      <div>
+        <button type="button" id="btn-cancel-scanned-review" class="btn btn-secondary" style="font-weight:600; padding:8px 16px; border-radius:6px; cursor:pointer;">
+          रद्द करा
+        </button>
+      </div>
+      <div style="display:flex; gap:10px; flex-wrap:wrap;">
+        <button type="button" id="btn-download-scanned-pdf" class="btn btn-secondary" style="font-weight:700; padding:8px 16px; border-radius:6px; cursor:pointer; background:#334155; color:#FFFFFF; border:none;">
+          📄 ऑफलाइन PDF डाउनलोड करा
+        </button>
+        <button type="button" id="btn-save-scanned-draft" class="btn btn-warning" style="font-weight:700; padding:8px 16px; border-radius:6px; cursor:pointer; background:#F59E0B; color:#FFFFFF; border:none;">
+          💾 यादी सेव्ह करा
+        </button>
+        <button type="button" id="btn-confirm-send-counter" class="btn btn-primary fw-bold" style="background:#0F766E; border-color:#0F766E; color:#FFFFFF; padding:8px 20px; border-radius:6px; font-weight:700; cursor:pointer;">
+          🛒 थेट काउंटरला पाठवा
+        </button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script src="/static/js/jsqr.min.js?v={{ time }}"></script>
+<script src="/static/js/scanner.js?v={{ time }}"></script>
+<script src="/static/js/catalog.js?v={{ time }}"></script>
+<script src="/static/js/saved_lists.js?v={{ time }}"></script>
+<script src="/static/js/reverse_pos.js?v={{ time }}"></script>
+<script src="/static/js/home.js?v={{ time }}"></script>
+{% endblock %}

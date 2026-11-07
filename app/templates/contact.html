@@ -1,0 +1,123 @@
+{% extends "base.html" %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="/static/css/contact.css?v={{ time }}">
+{% endblock %}
+
+{% block content %}
+<!-- Page Hero -->
+<section class="page-hero">
+  <div class="container">
+    <h1>📞 ग्राहक व व्यापारी सहाय्य केंद्र</h1>
+    <p>आपल्याला बिलिंग, AI यादी शुद्धीकरण किंवा QR स्कॅनरबाबत काही अडचण असल्यास आमच्या हेल्पडेस्कशी संपर्क साधा.</p>
+  </div>
+</section>
+
+<div class="container">
+  <div class="contact-layout">
+
+    <!-- Contact Form Card -->
+    <div class="card">
+      <h2 class="card-title">📝 चौकशी / तक्रार नोंदणी फॉर्म</h2>
+      <p style="font-size:0.9rem;color:#64748B;margin-bottom:20px;">
+        खालील माहिती भरा. सबमिट केल्यानंतर आपणास तात्काळ तिकीट क्रमांक (Ticket ID) दिला जाईल.
+      </p>
+
+      <form id="contact-support-form">
+        <div class="form-group">
+          <label class="form-label" for="contact-name">आपले नाव (Name) *</label>
+          <input type="text" id="contact-name" class="form-control" placeholder="उदा. राहुल देशमुख" required>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="contact-mobile">मोबाईल नंबर (Mobile Number) *</label>
+          <input type="tel" id="contact-mobile" class="form-control" placeholder="उदा. 9876543210" maxlength="10" required>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="contact-category">समस्येचा प्रकार (Category) *</label>
+          <select id="contact-category" class="form-control" required>
+            <option value="">-- प्रकार निवडा --</option>
+            <option value="बिलिंग गणना अडचण">दुकानदार बिलिंग काउंटर व गणितीय अडचण</option>
+            <option value="AI यादी वाचन त्रुटी">AI यादी शुद्धीकरण व स्पेलिंग अडचण</option>
+            <option value="QR स्कॅनर व पेमेंट समस्या">QR स्कॅनर व UPI पेमेंट समस्या</option>
+            <option value="नवीन उत्पादन नोंदणी">कॅटलॉगमध्ये नवीन वस्तू जोडणे</option>
+            <option value="इतर">इतर सर्वसाधारण चौकशी</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="contact-message">संदेश / समस्येचा सविस्तर तपशील (Message) *</label>
+          <textarea id="contact-message" class="form-control" placeholder="आपल्या समस्येचे थोडक्यात वर्णन करा..." rows="5" required></textarea>
+        </div>
+
+        <button type="submit" id="contact-submit-btn" class="btn btn-primary btn-lg" style="width:100%;">
+          📩 संदेश पाठवा
+        </button>
+      </form>
+
+      <!-- Feedback Ticket Box -->
+      <div id="contact-ticket-feedback" style="display:none;margin-top:20px;">
+        <!-- Injected dynamically via contact.js -->
+      </div>
+    </div>
+
+    <!-- Helpdesk Information Aside -->
+    <aside class="contact-info-card">
+      <h3 style="font-size:1.3rem;font-weight:700;color:#1E293B;margin-bottom:8px;">
+        हेल्पडेस्क व व्यापारी संपर्क
+      </h3>
+      <p style="font-size:0.9rem;color:#64748B;">
+        स्थानिक किराणा व्यावसायिक आणि ग्राहक दोघांसाठी २४x७ थेट सहाय्य उपलब्ध.
+      </p>
+
+      <div class="contact-channel-list">
+        <!-- Phone -->
+        <div class="channel-item">
+          <div class="channel-icon">📞</div>
+          <div class="channel-detail">
+            <strong>टोल-फ्री हेल्पलाइन</strong>
+            <span>१८००-२०९-४५६७ (सकाळी ८ ते रात्री १०)</span>
+          </div>
+        </div>
+
+        <!-- WhatsApp -->
+        <div class="channel-item">
+          <div class="channel-icon">💬</div>
+          <div class="channel-detail">
+            <strong>व्हॉट्सअ‍ॅप सहाय्य</strong>
+            <span>+९१ ९१२३४ ५६७८९ (झटपट प्रतिसाद)</span>
+          </div>
+        </div>
+
+        <!-- Email -->
+        <div class="channel-item">
+          <div class="channel-icon">✉️</div>
+          <div class="channel-detail">
+            <strong>ईमेल संपर्क</strong>
+            <span>support@smartkirana.in</span>
+          </div>
+        </div>
+
+        <!-- Headquarters -->
+        <div class="channel-item">
+          <div class="channel-icon">🏢</div>
+          <div class="channel-detail">
+            <strong>मुख्य कार्यालय</strong>
+            <span>स्मार्ट किराणा एंटरप्राइज, एफ.सी. रोड, शिवाजीनगर, पुणे - ४११००५, महाराष्ट्र.</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="sla-notice">
+        ⚡ <strong>SLA हमी:</strong> सर्व नोंदणीकृत तक्रारींचे २४ तासांच्या आत निराकरण केले जाईल.
+      </div>
+    </aside>
+
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="/static/js/contact.js?v={{ time }}"></script>
+{% endblock %}

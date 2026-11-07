@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="mr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover">
+  <title>{{ title or "स्मार्ट किराणा एंटरप्राइज" }}</title>
+  <meta name="description" content="स्मार्ट किराणा एंटरप्राइज - AI यादी शुद्धीकरण, रिव्हर्स बिलिंग पद्धत, भाववाढ ऑडिट व सुरक्षित शून्य-कीईंग UPI पेमेंट.">
+  <meta name="theme-color" content="#FF6A00">
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/svg+xml" href="/static/img/logo.svg">
+
+  <!-- Google Fonts Mukta & Noto Sans Devanagari -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Mukta:wght@300;400;500;600;700;800&family=Noto+Sans+Devanagari:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <!-- Stylesheets -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+  <link rel="stylesheet" href="/static/css/main.css?v={{ time }}">
+  <link rel="stylesheet" href="/static/css/navbar.css?v={{ time }}">
+  <link rel="stylesheet" href="/static/css/footer.css?v={{ time }}">
+  {% block extra_css %}{% endblock %}
+</head>
+<body>
+
+  <!-- Offline Warning Banner -->
+  <div id="offline-banner" class="offline-banner">
+    ⚠️ आपण सध्या ऑफलाइन आहात. सर्व बिलिंग व स्थानिक पार्सर ऑफलाइन मोडमध्ये कार्यरत आहेत.
+  </div>
+
+  <!-- Global Header & Navbar -->
+  <header class="site-header">
+    <div class="container navbar">
+      <!-- Brand Logo -->
+      <a href="/" class="navbar-brand">
+        <img src="/static/img/logo.svg" alt="स्मार्ट किराणा लोगो">
+        <div class="brand-text">
+          <span class="brand-title">स्मार्ट किराणा</span>
+          <span class="brand-subtitle">Smart Kirana Enterprise</span>
+        </div>
+      </a>
+
+      <!-- Desktop Navigation Links -->
+      <ul class="nav-links">
+        <li>
+          <a href="/" class="nav-link {% if active_page == 'home' %}active{% endif %}">
+            <span>🏠 मुख्यपृष्ठ</span>
+          </a>
+        </li>
+        <li>
+          <a href="/catalog" class="nav-link {% if active_page == 'catalog' %}active{% endif %}">
+            <span>🛒 किराणा कॅटलॉग</span>
+          </a>
+        </li>
+        <li>
+          <a href="/history/" class="nav-link {% if active_page == 'history' %}active{% endif %}">
+            <span>📜 खरेदी इतिहास</span>
+          </a>
+        </li>
+        <li>
+          <a href="/analyzer/" class="nav-link {% if active_page == 'analyzer' %}active{% endif %}">
+            <span>📊 दर विश्लेषक व सिम्युलेटर</span>
+          </a>
+        </li>
+        <li>
+          <a href="/about/" class="nav-link {% if active_page == 'about' %}active{% endif %}">
+            <span>ℹ️ आमच्याबद्दल</span>
+          </a>
+        </li>
+        <li>
+          <a href="/contact/" class="nav-link {% if active_page == 'contact' %}active{% endif %}">
+            <span>📞 संपर्क</span>
+          </a>
+        </li>
+      </ul>
+
+      <!-- Navbar Actions (Network Status, Version, Mobile Drawer Button) -->
+      <div class="nav-actions">
+        <div id="network-status-badge" class="status-badge">
+          <span class="status-dot"></span> ऑनलाइन
+        </div>
+        <span class="version-tag">v1.1</span>
+        <button id="hamburger-btn" class="hamburger-btn" aria-label="मेनू उघडा">
+          <span></span>
+          <span></span>
+          <span></span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Mobile Drawer Menu -->
+  <div id="drawer-overlay" class="drawer-overlay">
+    <div class="mobile-drawer">
+      <div class="drawer-header">
+        <div class="navbar-brand">
+          <img src="/static/img/logo.svg" alt="स्मार्ट किराणा">
+          <span style="font-weight:800;font-size:1.25rem;color:#1E293B;">स्मार्ट किराणा</span>
+        </div>
+        <button id="drawer-close-btn" class="modal-close">✕</button>
+      </div>
+      <div class="drawer-body">
+        <ul class="drawer-links">
+          <li><a href="/" class="drawer-link {% if active_page == 'home' %}active{% endif %}">🏠 मुख्यपृष्ठ</a></li>
+          <li><a href="/catalog" class="drawer-link {% if active_page == 'catalog' %}active{% endif %}">🛒 किराणा कॅटलॉग</a></li>
+          <li><a href="/history/" class="drawer-link {% if active_page == 'history' %}active{% endif %}">📜 खरेदी इतिहास</a></li>
+          <li><a href="/analyzer/" class="drawer-link {% if active_page == 'analyzer' %}active{% endif %}">📊 दर विश्लेषक व सिम्युलेटर</a></li>
+          <li><a href="/about/" class="drawer-link {% if active_page == 'about' %}active{% endif %}">ℹ️ आमच्याबद्दल</a></li>
+          <li><a href="/contact/" class="drawer-link {% if active_page == 'contact' %}active{% endif %}">📞 संपर्क</a></li>
+        </ul>
+      </div>
+      <div class="drawer-footer">
+        <p style="font-size:0.8rem;color:#64748B;">स्मार्ट किराणा v1.1 • सुरक्षित व पारदर्शक बिलिंग</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Content Area -->
+  <main>
+    {% block content %}{% endblock %}
+  </main>
+
+  <!-- Global Toast Notification Container -->
+  <div id="toast-container"></div>
+
+  <!-- Global Professional Footer -->
+  <footer class="site-footer">
+    <div class="container footer-grid">
+      <!-- Brand & Mission -->
+      <div class="footer-brand">
+        <div class="footer-brand-title">
+          <img src="/static/img/logo.svg" alt="स्मार्ट किराणा">
+          <span>स्मार्ट किराणा एंटरप्राइज</span>
+        </div>
+        <p class="footer-desc">
+          पारदर्शक भाव, बिनचूक हिशोब आणि सुरक्षित व्यवहार — घरगुती बजेटचे रक्षण करणारे आणि स्थानिक किराणा व्यावसायिकांना सक्षम करणारे आधुनिक डिजिटल व्यासपीठ.
+        </p>
+        <div class="footer-helpdesk">
+          <strong>हेल्पडेस्क:</strong> १८००-२०९-४५६७ | support@smartkirana.in
+        </div>
+      </div>
+
+      <!-- Quick Links -->
+      <div>
+        <h4 class="footer-heading">द्रुत दुवे</h4>
+        <ul class="footer-links">
+          <li><a href="/">मुख्यपृष्ठ (बिलिंग काउंटर)</a></li>
+          <li><a href="/history/">मागील खरेदी नोंदी</a></li>
+          <li><a href="/analyzer/">दर विश्लेषक व सिम्युलेटर</a></li>
+          <li><a href="/about/">सिस्टीम कार्यप्रणाली (Workflow)</a></li>
+          <li><a href="/contact/">मदत व तक्रार निवारण</a></li>
+        </ul>
+      </div>
+
+      <!-- Safety Badges & Compliance -->
+      <div class="footer-safety">
+        <h4 class="footer-heading">ग्राहक व व्यापारी सुरक्षा मानके</h4>
+        <div class="safety-badge-card">
+          <img src="/static/img/npci-badge.svg" alt="NPCI मानके">
+          <div class="safety-badge-text">
+            <strong>NPCI UPI मानकांनुसार प्रमाणित</strong>
+            <span>अचूक एकूण रकमेचे शून्य-कीईंग डीप-लिंकिंग</span>
+          </div>
+        </div>
+        <div class="safety-badge-card">
+          <img src="/static/img/shield-badge.svg" alt="सुरक्षितता">
+          <div class="safety-badge-text">
+            <strong>कॅमेरा डेटा शून्य साठवणूक</strong>
+            <span>QR कोड फक्त थेट ब्राउझरमध्ये वाचला जातो, खाजगी सुरक्षा</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Copyright Bar -->
+    <div class="container footer-bottom">
+      <div>
+        © २०२६ <strong>स्मार्ट किराणा एंटरप्राइज</strong>. सर्व हक्क सुरक्षित. | आवृत्ती <span class="version-tag">v1.1</span>
+      </div>
+      <div>
+        भारतीय DPDP कायदा २०२३ सुसंगत डेटा गोपनीयता प्रणाली.
+      </div>
+    </div>
+  </footer>
+
+  <!-- Scripts -->
+  <script src="/static/js/i18n.js?v={{ time }}"></script>
+  <script src="/static/js/pdf_export.js?v={{ time }}"></script>
+  <script src="/static/js/app.js?v={{ time }}"></script>
+  {% block extra_js %}{% endblock %}
+</body>
+</html>

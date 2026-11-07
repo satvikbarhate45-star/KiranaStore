@@ -1,0 +1,304 @@
+/* ==============================================================================
+   Navbar & Mobile Drawer Stylesheet
+   Devanagari Navigation & Responsive Drawer Menu
+============================================================================== */
+
+.site-header {
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  width: 100%;
+  background-color: #FFFFFF !important;
+  border-bottom: 1px solid var(--border-light);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.navbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 72px;
+  gap: 16px;
+}
+
+/* Brand Logo */
+.navbar-brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  text-decoration: none;
+  color: var(--text-main);
+  flex-shrink: 0;
+}
+
+.navbar-brand img {
+  width: 44px;
+  height: 44px;
+  border-radius: 10px;
+}
+
+.brand-text {
+  display: flex;
+  flex-direction: column;
+}
+
+.brand-title {
+  font-size: 1.45rem;
+  font-weight: 800;
+  line-height: 1.1;
+  color: #1E293B;
+  background: linear-gradient(135deg, #FF6A00 0%, #D84315 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.brand-subtitle {
+  font-size: 0.76rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  letter-spacing: 0.5px;
+}
+
+/* Navigation Links (Desktop) */
+.nav-links {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  list-style: none;
+}
+
+.nav-link {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  border-radius: var(--radius-md);
+  text-decoration: none;
+  transition: all 0.2s ease;
+  position: relative;
+}
+
+.nav-link:hover {
+  color: var(--primary-saffron);
+  background: var(--primary-light);
+}
+
+.nav-link.active {
+  color: var(--primary-saffron);
+  background: var(--primary-light);
+  font-weight: 700;
+}
+
+.nav-link.active::after {
+  content: '';
+  position: absolute;
+  bottom: -10px;
+  left: 14px;
+  right: 14px;
+  height: 3px;
+  background: var(--primary-saffron);
+  border-radius: 2px;
+}
+
+/* Navbar Right Controls */
+.nav-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: var(--radius-full);
+  background: #DCFCE7;
+  color: #166534;
+  border: 1px solid #86EFAC;
+}
+
+.status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #22C55E;
+}
+
+.version-tag {
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: var(--radius-sm);
+  background: #F1F5F9;
+  color: var(--text-muted);
+  border: 1px solid var(--border-light);
+}
+
+/* Hamburger Toggle Button */
+.hamburger-btn {
+  display: none;
+  background: none;
+  border: none;
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 5px;
+  padding: 8px;
+  transition: background 0.2s;
+}
+
+.hamburger-btn:hover {
+  background: var(--surface-hover);
+}
+
+.hamburger-btn span {
+  width: 24px;
+  height: 2.5px;
+  background-color: var(--text-main);
+  border-radius: 2px;
+  transition: all 0.3s ease;
+}
+
+/* Mobile Drawer Overlay */
+.drawer-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(15, 23, 42, 0.5);
+  backdrop-filter: blur(4px);
+  z-index: 1500;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: all 0.3s ease;
+}
+
+.drawer-overlay.active {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+}
+
+/* Mobile Drawer Container */
+.mobile-drawer {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 300px;
+  max-width: 85vw;
+  background: #FFFFFF;
+  z-index: 1600;
+  box-shadow: -4px 0 20px rgba(0, 0, 0, 0.15);
+  transform: translateX(100%);
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  display: flex;
+  flex-direction: column;
+}
+
+.drawer-overlay.active .mobile-drawer {
+  transform: translateX(0);
+}
+
+.drawer-header {
+  padding: 20px;
+  border-bottom: 1px solid var(--border-light);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.drawer-body {
+  padding: 20px 16px;
+  flex: 1;
+  overflow-y: auto;
+}
+
+.drawer-links {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.drawer-link {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--text-main);
+  border-radius: var(--radius-md);
+  text-decoration: none;
+  transition: all 0.2s;
+}
+
+.drawer-link:hover, .drawer-link.active {
+  color: var(--primary-saffron);
+  background: var(--primary-light);
+}
+
+.drawer-footer {
+  padding: 16px 20px;
+  border-top: 1px solid var(--border-light);
+  background: #F8FAFC;
+}
+
+/* Responsive Breakpoints */
+@media (max-width: 992px) {
+  .nav-links {
+    display: none;
+  }
+  .hamburger-btn {
+    display: flex;
+  }
+}
+
+@media (max-width: 540px) {
+  .version-tag {
+    display: none;
+  }
+  .navbar {
+    height: 64px;
+    gap: 8px;
+  }
+  .brand-title {
+    font-size: 1.25rem;
+  }
+  .brand-subtitle {
+    font-size: 0.7rem;
+  }
+  .navbar-brand img {
+    width: 36px;
+    height: 36px;
+  }
+  .status-badge {
+    font-size: 0.78rem;
+    padding: 3px 8px;
+  }
+}
+
+@media (max-width: 340px) {
+  .brand-subtitle {
+    display: none;
+  }
+  .brand-title {
+    font-size: 1.12rem;
+  }
+  .status-badge {
+    display: none;
+  }
+}

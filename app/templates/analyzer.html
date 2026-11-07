@@ -1,0 +1,824 @@
+{% extends "base.html" %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="/static/css/analyzer.css?v={{ time }}">
+<style>
+  /* Fix Dropdown Distortion & Clipping */
+  .sim-sku-select, 
+  .card-select-dropdown, 
+  .dropdown-menu,
+  .autocomplete-dropdown {
+    max-height: 260px !important;
+    overflow-y: auto !important;
+    z-index: 1050 !important;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15) !important;
+  }
+  .sim-item-row {
+    position: relative !important;
+  }
+  .table-responsive {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* Upload Historical Bill Modal UI/UX */
+  #uploadHistoricalBillModal .modal-dialog {
+    max-width: 800px;
+    width: 95%;
+    margin: 1.75rem auto;
+    display: flex;
+    align-items: center;
+    min-height: calc(100% - 3.5rem);
+  }
+  #uploadHistoricalBillModal .modal-content {
+    max-height: 90vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    border-radius: 12px;
+    width: 100%;
+    box-shadow: 0 12px 36px rgba(0,0,0,0.25);
+    background: #ffffff;
+  }
+  #uploadHistoricalBillModal .modal-body {
+    overflow-y: auto;
+    max-height: calc(90vh - 140px);
+    padding: 1.25rem;
+  }
+  #uploadHistoricalBillModal .modal-footer {
+    flex-shrink: 0;
+    background: #ffffff;
+    border-top: 1px solid #e9ecef;
+    padding: 0.75rem 1.25rem;
+    z-index: 1055;
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+  }
+  .hist-thumb-card {
+    transition: transform 0.15s ease;
+  }
+  .hist-thumb-card:hover {
+    transform: scale(1.03);
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Page Hero -->
+<section class="page-hero">
+  <div class="container">
+    <h1>📊 दर विश्लेषक, किराणा बजेट सिम्युलेटर व ३-वे ऑडिट</h1>
+    <p>मागील खरेदी दर विरुद्ध दुकानदार बिल विरुद्ध अंतिम UPI भरणा यांची त्रिमितीय पडताळणी करा, बजेट मर्यादा ठरवा आणि महागाईच्या चढ-उतारांवर नियंत्रण ठेवा.</p>
+  </div>
+</section>
+
+<div class="container">
+
+  <!-- Festival Surge Predictor Alert Card (MODULE 6) -->
+  <div id="analyzer-festival-surge-banner" class="festival-surge-card" style="display:none;background:linear-gradient(135deg, #FFFBEB 0%, #FEF3C7 100%);border:1px solid #F59E0B;border-radius:12px;padding:14px 18px;margin-bottom:20px;box-shadow:0 2px 6px rgba(245,158,11,0.15);">
+    <div style="display:flex;align-items:flex-start;gap:12px;">
+      <span style="font-size:1.6rem;line-height:1;">💡</span>
+      <div style="flex:1;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;flex-wrap:wrap;gap:8px;">
+          <strong id="analyzer-fest-title" style="color:#92400E;font-size:1rem;">सणासुदीचा स्मार्ट खरेदी सल्ला</strong>
+          <span id="analyzer-fest-badge" style="background:#FDE68A;color:#78350F;font-size:0.75rem;padding:2px 8px;border-radius:10px;font-weight:700;">आगामी उत्सव</span>
+        </div>
+        <p id="analyzer-fest-text" style="color:#78350F;font-size:0.92rem;margin:0 0 6px 0;font-weight:600;line-height:1.5;"></p>
+        <div id="analyzer-fest-chips" style="display:flex;gap:6px;flex-wrap:wrap;font-size:0.8rem;color:#92400E;"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tab Navigation -->
+  <div class="analyzer-tabs">
+    <button class="tab-btn active" data-tab="tab-simulator">
+      🔮 किराणा बजेट सिम्युलेटर
+    </button>
+    <button class="tab-btn" data-tab="tab-audit-3way">
+      ⚖️ ३-वे भाव तफावत व ऑडिट (3-Way Audit)
+    </button>
+    <button class="tab-btn" data-tab="tab-comparator">
+      🔄 दोन खरेदींची तुलना (Comparator)
+    </button>
+    <button class="tab-btn" data-tab="tab-trends">
+      📈 दर हालचाली व अहवाल (Trends)
+    </button>
+  </div>
+
+  <!-- Tab 1: Prospective Budget Simulator -->
+  <div id="tab-simulator" class="tab-content active">
+    
+    <!-- Seasonal & Event List Replay (PILLAR 3) -->
+    <div class="card" style="margin-bottom:16px; background:#FDF4FF; border:1.5px solid #F0ABFC; border-radius:12px; padding:16px 20px;">
+      <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
+        <div style="display:flex; align-items:center; gap:8px;">
+          <span style="font-size:1.4rem;">🎉</span>
+          <div>
+            <h3 style="margin:0; font-size:1.05rem; font-weight:700; color:#86198F;">मागील सण / कार्यक्रम यादी रीप्ले (Seasonal Event Replay)</h3>
+            <span style="font-size:0.82rem; color:#A21CAF;">मागील सण किंवा कार्यक्रमाच्या यादीतील सर्व वस्तू व प्रमाण एका क्लिकवर खालील सिम्युलेटरमध्ये आणा.</span>
+          </div>
+        </div>
+        <div style="display:flex; gap:8px; flex-wrap:wrap;">
+          <button type="button" class="btn btn-sm btn-replay-event" data-occasion="दिवाळी" style="background:#FAF5FF; border:1px solid #D8B4FE; color:#6B21A8; font-weight:700; border-radius:8px; padding:6px 12px; cursor:pointer;">
+            🪔 दिवाळी फराळ रीप्ले
+          </button>
+          <button type="button" class="btn btn-sm btn-replay-event" data-occasion="पाहुणचार" style="background:#FAF5FF; border:1px solid #D8B4FE; color:#6B21A8; font-weight:700; border-radius:8px; padding:6px 12px; cursor:pointer;">
+            👥 पाहुणचार रीप्ले
+          </button>
+          <button type="button" class="btn btn-sm btn-replay-event" data-occasion="लग्नकार्य" style="background:#FAF5FF; border:1px solid #D8B4FE; color:#6B21A8; font-weight:700; border-radius:8px; padding:6px 12px; cursor:pointer;">
+            🎊 लग्नकार्य रीप्ले
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Quick Budget Preset Chips (MODULE 4) -->
+    <div class="quick-budget-chips">
+      <span class="budget-chips-label">🎯 जलद बजेट मर्यादा निवडा (Quick Budget Presets):</span>
+      <button type="button" class="budget-chip" data-budget="1000">₹१,०००</button>
+      <button type="button" class="budget-chip" data-budget="2000">₹२,०००</button>
+      <button type="button" class="budget-chip" data-budget="3000">₹३,०००</button>
+      <button type="button" class="budget-chip" data-budget="5000">₹५,०००</button>
+      <button type="button" class="budget-chip" data-budget="10000">₹१०,०००</button>
+      <button type="button" class="budget-chip" data-budget="20000">₹२०,०००</button>
+    </div>
+
+    <div class="simulator-layout">
+      <!-- Item Selection List -->
+      <div class="card">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:10px;">
+          <div>
+            <h2 class="card-title" style="margin-bottom:4px;">🛒 कौटुंबिक खरेदी इतिहास आधारित सिम्युलेटर (Personal Historical Budget Simulator)</h2>
+            <p style="font-size:0.88rem;color:#64748B;">तुमच्या कुटुंबाच्या मागील खरेदी नोंदींनुसार अचूक बजेट अंदाज. ज्या वस्तूंचा इतिहास नाही, त्यांचे दर थेट प्रविष्ट करा.</p>
+          </div>
+          <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+            <button type="button" class="btn btn-outline-primary btn-sm" data-bs-toggle="modal" data-bs-target="#uploadHistoricalBillModal" id="btn-open-historical-bill-modal" style="font-weight:700;display:flex;align-items:center;gap:6px;border:1.5px solid #0284C7;color:#0369A1;padding:6px 12px;border-radius:6px;cursor:pointer;background:#F0F9FF;">
+              <i class="bi bi-receipt"></i> 📷 जुनी पावती स्कॅन करा (इतिहास जोडा)
+            </button>
+            <button type="button" id="add-sim-item-btn" class="btn btn-secondary btn-sm" style="font-weight:700;padding:6px 12px;border-radius:6px;cursor:pointer;">
+              ➕ वस्तू जोडा
+            </button>
+          </div>
+        </div>
+
+        <div id="sim-items-container" class="simulator-items-list">
+          <!-- Populated via analyzer.js -->
+        </div>
+      </div>
+
+      <!-- Simulator Summary Sticky Card -->
+      <aside class="sim-summary-card">
+        <span class="sim-total-title">अंदाजित मासिक किराणा खर्च (मागील खरेदी नोंदींवर आधारित)</span>
+        <div id="sim-total-display" class="sim-expected-total">₹0.00</div>
+
+        <div class="sim-range-box">
+          <div class="sim-range-row">
+            <span>किमान अंदाज (-५%):</span>
+            <strong id="sim-low-display" style="color:#A7F3D0;">₹0.00</strong>
+          </div>
+          <div class="sim-range-row">
+            <span>कमाल मर्यादा (+७%):</span>
+            <strong id="sim-high-display" style="color:#FCA5A5;">₹0.00</strong>
+          </div>
+          <div id="sim-budget-limit-row" class="sim-range-row" style="display:none;border-top:1px dashed #475569;margin-top:8px;padding-top:8px;">
+            <span>निवडलेले बजेट:</span>
+            <strong id="sim-selected-budget-display" style="color:#FFD54F;">₹0.00</strong>
+          </div>
+        </div>
+
+        <div id="sim-missing-prices-alert" class="alert alert-warning" style="display:none;background:#FEF3C7;border:1px solid #F59E0B;color:#92400E;padding:8px 12px;border-radius:8px;font-size:0.84rem;margin:12px 0;font-weight:700;">
+          ⚠️ काही वस्तूंचा इतिहास उपलब्ध नाही, कृपया चालू दर टाका.
+        </div>
+
+        <p style="font-size:0.85rem;color:#94A3B8;line-height:1.6;margin-bottom:16px;">
+          💡 हा अंदाज तुमच्या स्वतःच्या मागील खरेदी इतिहासावर आधारित आहे.
+        </p>
+
+        <!-- 3-Way Action Split (PILLAR 5) -->
+        <div style="display:flex;flex-direction:column;gap:8px;">
+          <button type="button" id="btn-sim-download-pdf" class="btn btn-secondary" style="width:100%;text-align:center;font-weight:700;background:#334155;color:#FFFFFF;border:none;padding:10px 14px;border-radius:8px;cursor:pointer;">
+            📄 यादीची प्रिंट / PDF डाउनलोड
+          </button>
+          <button type="button" id="sim-send-counter-btn" class="btn btn-primary" style="width:100%;text-align:center;font-weight:700;padding:10px 14px;border-radius:8px;cursor:pointer;">
+            🛒 काउंटरला पाठवा
+          </button>
+          <button type="button" id="btn-sim-save-budget" class="btn btn-warning" style="width:100%;text-align:center;font-weight:700;background:#F59E0B;color:#FFFFFF;border:none;padding:10px 14px;border-radius:8px;cursor:pointer;">
+            💾 बजेट सेव्ह करा
+          </button>
+        </div>
+      </aside>
+    </div>
+  </div>
+
+  <!-- Tab 2: Closed-Loop 3-Way Comparative Price Variance & Audit Engine (MODULE 4) -->
+  <div id="tab-audit-3way" class="tab-content d-none">
+    <div class="card">
+      <div style="margin-bottom:18px;">
+        <h2 class="card-title" style="margin-bottom:4px;">⚖️ त्रिमितीय दर तपासणी व खरेदी ऑडिट (3-Way Audit Engine)</h2>
+        <p style="font-size:0.9rem;color:#64748B;margin:0 0 14px 0;">
+          कोणत्याही वस्तूचे नाव टाईप करून मागील खरेदी दर, २२% रास्त किरकोळ दर आणि स्थानिक दुकानदार दराचे थेट ऑडिट करा.
+        </p>
+
+        <!-- Dynamic Smart Input / Search Box & Grounding Trigger -->
+        <div class="audit-search-toolbar" style="background:#F8FAFC;border:1px solid #CBD5E1;border-radius:12px;padding:14px;box-shadow:0 1px 3px rgba(0,0,0,0.05);">
+          <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+            <div style="flex:3;min-width:240px;position:relative;">
+              <input 
+                type="text" 
+                id="audit-commodity-input" 
+                list="audit-commodity-datalist" 
+                class="form-control" 
+                placeholder="वस्तूचे नाव टाईप करा (उदा. साखर, चना डाळ, गोडतेल)..."
+                autocomplete="off"
+                style="height:46px;font-size:0.95rem;font-weight:600;"
+              />
+              <datalist id="audit-commodity-datalist"></datalist>
+            </div>
+
+            <div style="flex:1;min-width:100px;">
+              <input 
+                type="number" 
+                id="audit-quantity-input" 
+                class="form-control" 
+                value="1.0" 
+                step="any" 
+                min="0.01" 
+                placeholder="प्रमाण"
+                title="प्रमाण (Quantity)"
+                style="height:46px;font-size:0.95rem;text-align:center;"
+              />
+            </div>
+
+            <div style="flex:1;min-width:110px;">
+              <select id="audit-unit-select" class="form-control" style="height:46px;font-size:0.92rem;">
+                <option value="किलो" selected>किलो</option>
+                <option value="ग्रॅम">ग्रॅम</option>
+                <option value="लिटर">लिटर</option>
+                <option value="पाकीट">पाकीट</option>
+                <option value="नग">नग</option>
+              </select>
+            </div>
+
+            <div>
+              <button type="button" id="btn-run-audit" class="btn btn-warning fw-bold" style="height:46px;padding:0 20px;font-weight:700;display:flex;align-items:center;gap:6px;white-space:nowrap;">
+                🔍 ऑडिट करा
+              </button>
+            </div>
+            <div>
+              <button type="button" id="btn-import-history-receipt" class="btn btn-warning fw-bold" style="height:46px;padding:0 16px;font-weight:700;display:flex;align-items:center;gap:6px;white-space:nowrap;border-radius:6px;cursor:pointer;">
+                📜 खरेदी इतिहासातील यादी थेट ऑडिट करा
+              </button>
+            </div>
+            <div>
+              <button type="button" id="btn-analyzer-camera-scan" class="btn btn-warning fw-bold" style="height:46px;padding:0 16px;font-weight:700;display:flex;align-items:center;gap:6px;white-space:nowrap;border-radius:6px;cursor:pointer;" title="पावतीचा फोटो स्कॅन करून ऑडिट करा">
+                📷 पावतीचा फोटो स्कॅन करा
+              </button>
+            </div>
+          </div>
+
+          <!-- Quick Staples Chips -->
+          <div style="display:flex;align-items:center;gap:8px;margin-top:10px;flex-wrap:wrap;">
+            <span style="font-size:0.8rem;color:#64748B;font-weight:600;">त्वरित तपासा:</span>
+            <div id="audit-quick-chips" style="display:flex;gap:6px;flex-wrap:wrap;"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Internal Historical Baseline Status Badge (PILLAR 1) -->
+      <div id="audit-live-status-badge" style="display:none;margin-bottom:14px;background:#F0FDFA;border:1.5px solid #0D9488;border-radius:10px;padding:12px 16px;color:#0F766E;font-size:0.95rem;font-weight:700;display:none;align-items:center;gap:10px;box-shadow:0 2px 6px rgba(13,148,136,0.15);">
+        <span style="font-size:1.3rem;">📖</span>
+        <span id="audit-live-status-text">अंतर्गत खरेदी इतिहास बेसलाईन (Internal Purchase Ledger Benchmark)</span>
+      </div>
+
+      <!-- Notice for Unlisted / New Commodities -->
+      <div id="audit-unlisted-notice" style="display:none;margin-bottom:16px;background:#EFF6FF;border:1px solid #93C5FD;border-radius:10px;padding:12px 16px;color:#1E40AF;font-size:0.92rem;font-weight:600;display:flex;align-items:center;gap:10px;">
+        <!-- Populated via audit_engine.js -->
+      </div>
+
+      <!-- 3 Live Verified Cards + Live Profit Breakdown (MODULE 1 & 2) -->
+      <div class="audit-3way-grid" style="grid-template-columns:repeat(auto-fit, minmax(220px, 1fr));">
+        <!-- Card 1: Internal Historical Rate -->
+        <div class="audit-card govt-card">
+          <div class="audit-card-icon">🏛️</div>
+          <div class="audit-card-title">मागील खरेदी दर (Historical Rate)</div>
+          <div id="audit-govt-total" class="audit-card-amount"><span id="card-hist-ref-total" data-alias="card-apmc-total">₹0.00</span></div>
+          <div id="audit-govt-sub" class="audit-card-sub">मागील खरेदी नोंदींनुसार दर</div>
+        </div>
+
+        <!-- Card 2: Fair Retail Baseline -->
+        <div class="audit-card" style="background:#F0FDF4;border:1px solid #86EFAC;">
+          <div class="audit-card-icon">🏷️</div>
+          <div class="audit-card-title" style="color:#166534;">अपेक्षित रास्त दर (Fair Baseline = मागील दर)</div>
+          <div id="audit-fair-total" class="audit-card-amount" style="color:#15803D;"><span id="card-fair-total">₹0.00</span></div>
+          <div id="audit-fair-sub" class="audit-card-sub">ऐतिहासिक बेसलाईन दर</div>
+        </div>
+
+        <!-- Card 3: Current Billed / Shelf Rate -->
+        <div class="audit-card shop-card">
+          <div class="audit-card-icon">🏪</div>
+          <div class="audit-card-title">पावतीवरील / चालू दर (Billed / Store Rate)</div>
+          <div id="audit-shop-total" class="audit-card-amount"><span id="card-store-total">₹0.00</span></div>
+          <div id="audit-shop-sub" class="audit-card-sub">आज आकारलेला दर</div>
+        </div>
+
+        <!-- Card 4: Profit & Real Variance Breakdown -->
+        <div class="audit-card settled-card">
+          <div class="audit-card-icon">💰</div>
+          <div class="audit-card-title">थेट नफा व तफावत (Net Margin & Variance)</div>
+          <div id="audit-profit-total" class="audit-card-amount" style="color:#0F766E;">नफा: <span id="card-net-margin">₹0.00</span></div>
+          <div id="audit-profit-sub" class="audit-card-sub">दुकानदार निव्वळ नफा व खरी तफावत</div>
+        </div>
+      </div>
+
+      <!-- Color-coded Variance Badge Banner -->
+      <div id="audit-variance-banner" class="variance-banner fair">
+        <div>
+          <strong id="audit-variance-title" style="font-size:1.05rem;">दर विश्लेषण निष्कर्ष:</strong>
+          <p id="audit-variance-desc" style="font-size:0.88rem;margin:4px 0 0 0;">
+            दुकानदाराचे बिल वाजवी किरकोळ दरांशी (Fair Retail Price) सुसंगत आहे.
+          </p>
+        </div>
+        <div id="audit-variance-badge" class="variance-banner-badge">
+          वाजवी दर (Fair Retail Price)
+        </div>
+      </div>
+
+      <!-- Itemized Variance Table -->
+      <h3 style="font-size:1.15rem;font-weight:700;margin-bottom:12px;">📋 प्रत्येक वस्तूचे तपशीलवार दर विश्लेषण (Itemized Variance)</h3>
+      <div class="table-responsive" style="overflow-x:auto;-webkit-overflow-scrolling:touch;width:100%;">
+        <table class="audit-table" style="min-width:620px;width:100%;">
+          <thead>
+            <tr>
+              <th style="width:6%;">क्र.</th>
+              <th style="width:26%;">वस्तू व ब्रँड</th>
+              <th style="width:12%;">प्रमाण (Qty)</th>
+              <th style="width:13%;">मागील खरेदी दर</th>
+              <th style="width:13%;">वाजवी किरकोळ दर</th>
+              <th style="width:13%;">दुकानदार दर</th>
+              <th style="width:9%;">तफावत</th>
+              <th style="width:8%;">शेरा</th>
+            </tr>
+          </thead>
+          <tbody id="audit-items-table-body">
+            <!-- Injected dynamically via analyzer.js -->
+          </tbody>
+        </table>
+      </div>
+
+      <!-- 2-Column Visual Charts (Canvas) -->
+      <div class="charts-2col-grid">
+        <!-- Chart 1: Category Comparison Bar Chart -->
+        <div class="card" style="margin-bottom:0;box-shadow:none;border:1px solid #E2E8F0;">
+          <h4 style="font-size:1.05rem;font-weight:700;margin-bottom:12px;">📊 वर्गवारीनुसार दर तुलना (Historical vs Current)</h4>
+          <canvas id="category-bar-canvas" width="460" height="260" style="width:100%;height:auto;max-height:260px;"></canvas>
+        </div>
+
+        <!-- Chart 2: 30-Day Commodity Variance Trend Line (BUG 2) -->
+        <div class="card" style="margin-bottom:0;box-shadow:none;border:1px solid #E2E8F0;">
+          <h4 style="font-size:1.05rem;font-weight:700;margin-bottom:12px;">📈 ३० दिवसांचा दर तफावत कल (Variance Trend Line)</h4>
+          <canvas id="varianceTrendChart" width="460" height="260" style="width:100%;height:auto;max-height:260px;"></canvas>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Tab 3: Side-by-Side Trip Comparator -->
+  <div id="tab-comparator" class="tab-content d-none">
+    <div class="card">
+      <h2 class="card-title">⚖️ दोन खरेदी नोंदींची समोरासमोर तुलना</h2>
+      <p style="font-size:0.9rem;color:#64748B;margin-bottom:20px;">
+        कोणत्याही दोन खरेदी नोंदी निवडून प्रत्येक वस्तूच्या दरातील फरक आणि एकूण खर्चातील बदल तपासा.
+      </p>
+
+      <div class="comparator-header-bar">
+        <div>
+          <label class="form-label">पहिली खरेदी (खरेदी अ):</label>
+          <select id="compare-trip-a" class="form-control"></select>
+        </div>
+        <div>
+          <label class="form-label">दुसरी खरेदी (खरेदी ब):</label>
+          <select id="compare-trip-b" class="form-control"></select>
+        </div>
+        <div>
+          <button id="run-compare-btn" class="btn btn-primary" style="height:46px;">
+            तुलना करा
+          </button>
+        </div>
+      </div>
+
+      <div id="comparison-results-wrap">
+        <!-- Injected via analyzer.js -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Tab 4: Price Volatility & Trend Highlights -->
+  <div id="tab-trends" class="tab-content d-none">
+    
+    <!-- Personal Inflation Index Card (PILLAR 3) -->
+    <div class="card" style="margin-bottom:20px; background:#F8FAFC; border:1px solid #E2E8F0; border-radius:12px; padding:18px 22px;">
+      <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; margin-bottom:12px;">
+        <div style="display:flex; align-items:center; gap:10px;">
+          <span style="font-size:1.6rem;">📊</span>
+          <div>
+            <h3 style="margin:0; font-size:1.15rem; font-weight:700; color:#1E293B;">घरगुती वैयक्तिक महागाई निर्देशांक (Personal Inflation Index)</h3>
+            <span style="font-size:0.85rem; color:#64748B;">खरेदी तारखांवर आधारित महिना-दर-महिना (Month-over-Month) प्रत्यक्ष किराणा खर्चातील बदल.</span>
+          </div>
+        </div>
+        <div id="personal-inflation-badge" style="font-size:1.05rem; font-weight:800; padding:6px 14px; border-radius:8px; background:#E2E8F0; color:#334155;">
+          लोड होत आहे...
+        </div>
+      </div>
+      <div id="personal-inflation-series-container" style="display:grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap:12px; margin-top:10px;">
+        <!-- Injected via analyzer.js -->
+      </div>
+    </div>
+
+    <!-- Day Range Selector Bar -->
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;flex-wrap:wrap;gap:12px;">
+      <h2 style="font-size:1.35rem;font-weight:700;">किराणा दर चढ-उतार अहवाल</h2>
+      <div style="display:flex;gap:8px;">
+        <button class="btn btn-secondary btn-sm trend-day-btn active" data-days="30" onclick="loadPriceTrends(30)">गेले ३० दिवस</button>
+        <button class="btn btn-secondary btn-sm trend-day-btn" data-days="60" onclick="loadPriceTrends(60)">गेले ६० दिवस</button>
+        <button class="btn btn-secondary btn-sm trend-day-btn" data-days="90" onclick="loadPriceTrends(90)">गेले ९० दिवस</button>
+      </div>
+    </div>
+
+    <!-- Surges vs Dips 2-Column Grid -->
+    <div class="trends-top-grid">
+      <!-- Price Surges -->
+      <div class="trend-column-card">
+        <div class="trend-card-header">
+          <h3 style="font-size:1.15rem;font-weight:700;color:#991B1B;">🔥 सर्वाधिक भाववाढ (Price Surges)</h3>
+          <span class="badge badge-surge">महाग</span>
+        </div>
+        <div id="surge-items-container" class="trend-items-list">
+          <!-- Populated via analyzer.js -->
+        </div>
+      </div>
+
+      <!-- Price Dips -->
+      <div class="trend-column-card">
+        <div class="trend-card-header">
+          <h3 style="font-size:1.15rem;font-weight:700;color:#075985;">📉 सर्वाधिक स्वस्त (Value Dips)</h3>
+          <span class="badge badge-dip">किफायतशीर</span>
+        </div>
+        <div id="dip-items-container" class="trend-items-list">
+          <!-- Populated via analyzer.js -->
+        </div>
+      </div>
+    </div>
+
+    <!-- Interactive SVG Chart Container -->
+    <div class="chart-container-box">
+      <div id="trend-chart-wrapper">
+        <!-- SVG chart injected via analyzer.js -->
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- Intermediate Verification & Edit Modal for Simulator (MODULE 2) -->
+<div id="verification-modal" class="modal-overlay">
+  <div class="modal-content verification-modal-content">
+    <div class="modal-header verification-modal-header">
+      <div class="v-header-title-box">
+        <h3 id="verification-modal-title">📋 किराणा यादी पडताळणी व संपादन</h3>
+        <div id="v-verification-badge" class="v-verification-badge">
+          <!-- Dynamically populated badge: एकूण वस्तू: {count}/{total_input} -->
+        </div>
+      </div>
+      <button id="close-verification-modal" class="modal-close" aria-label="बंद करा">✕</button>
+    </div>
+
+    <div class="modal-body verification-modal-body">
+      <div class="v-instruction-box">
+        <p>
+          कृपया खालील वस्तूंची माहिती तपासा. आपण वस्तूचे नाव, प्रमाण किंवा एकक बदलू शकता, नको असलेली वस्तू काढू शकता किंवा नवीन वस्तू जोडू शकता.
+        </p>
+      </div>
+
+      <div class="v-table-wrapper" id="v-table-wrapper" style="overflow-x:auto;-webkit-overflow-scrolling:touch;width:100%;max-height:420px;overflow-y:auto;border:1px solid #E2E8F0;border-radius:8px;">
+        <table class="table v-table" id="v-table" style="min-width:540px;width:100%;margin-bottom:0;">
+          <thead>
+            <tr>
+              <th class="v-th-sr">क्र.</th>
+              <th class="v-th-name">वस्तूचे नाव व ब्रँड</th>
+              <th class="v-th-qty">प्रमाण (Qty)</th>
+              <th class="v-th-unit">एकक (Unit)</th>
+              <th class="v-th-price">अंदाजे किंमत ₹</th>
+              <th class="v-th-action">क्रिया</th>
+            </tr>
+          </thead>
+          <tbody id="v-table-body">
+            <!-- Dynamically populated -->
+          </tbody>
+        </table>
+      </div>
+
+      <div class="v-table-bottom-bar">
+        <button type="button" id="v-add-row-btn" class="btn btn-secondary btn-sm">
+          ➕ नवीन वस्तू जोडा
+        </button>
+        <span id="v-count-status-note" class="v-count-status-note">एकूण वस्तू: ०/०</span>
+      </div>
+    </div>
+
+    <div class="modal-footer verification-modal-footer">
+      <button type="button" id="v-cancel-btn" class="btn btn-secondary">
+        रद्द करा
+      </button>
+      <button type="button" id="v-confirm-btn" class="btn btn-primary btn-confirm-send">
+        ✨ यादी निश्चित करा व काउंटरला पाठवा
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Historical Receipt Batch Audit Modal -->
+<div id="import-saved-list-modal" class="modal-overlay">
+  <div class="modal-content" style="max-width:680px;background:#FFFFFF;border-radius:12px;box-shadow:0 8px 30px rgba(0,0,0,0.15);overflow:hidden;">
+    <div class="modal-header" style="padding:16px 20px;border-bottom:1px solid #E2E8F0;background:#F8FAFC;display:flex;justify-content:space-between;align-items:center;">
+      <h3 style="margin:0;font-size:1.15rem;font-weight:800;color:#0F172A;display:flex;align-items:center;gap:8px;">
+        <span>📜</span> <span>खरेदी इतिहासातील पावती थेट ३-वे ऑडिट करा</span>
+      </h3>
+      <button id="close-import-saved-list-modal" class="modal-close" style="background:none;border:none;font-size:1.4rem;cursor:pointer;color:#64748B;" aria-label="बंद करा">✕</button>
+    </div>
+    <div class="modal-body" style="padding:20px;max-height:450px;overflow-y:auto;">
+      <p style="font-size:0.9rem;color:#64748B;margin-bottom:16px;">
+        मागील खरेदीची कोणतीही प्रत्यक्ष बिल पावती निवडा. सिस्टीम पावतीतील प्रत्येक खरेदी वस्तूचा ग्राहकाने प्रत्यक्ष दिलेला दुकानदार दर, मागील खरेदी नोंद व २२% रास्त किरकोळ दराशी तुलना करून पावतीचे संपूर्ण ऑडिट करेल.
+      </p>
+      <div id="saved-lists-for-audit-container" style="display:flex;flex-direction:column;gap:12px;">
+        <div style="text-align:center;padding:24px;color:#64748B;">खरेदी पावत्या लोड होत आहेत...</div>
+      </div>
+    </div>
+    <div class="modal-footer" style="padding:14px 20px;border-top:1px solid #E2E8F0;display:flex;justify-content:flex-end;gap:10px;background:#F8FAFC;">
+      <button type="button" id="cancel-import-saved-list-btn" class="btn btn-secondary">रद्द करा</button>
+    </div>
+  </div>
+</div>
+
+<!-- Handwritten / Printed Grocery Slip Scanner Selection Modal (Analyzer) -->
+<div id="analyzerPhotoSourceModal" class="modal-overlay" style="display:none; z-index:2100;">
+  <div class="modal-content" style="max-width: 440px; padding: 0; border-radius: 16px; overflow: hidden; box-shadow: 0 10px 25px rgba(0,0,0,0.2);">
+    <div class="modal-header d-flex justify-content-between align-items-center" style="background:#F8FAFC; padding:16px 20px; border-bottom:1px solid #E2E8F0; display:flex; justify-content:space-between; align-items:center;">
+      <h3 style="margin:0; font-size:1.15rem; font-weight:700; color:#1E293B;">📷 पावतीचा फोटो कसा घ्यायचा?</h3>
+      <button type="button" id="close-analyzer-photo-modal" class="modal-close" style="background:none; border:none; font-size:1.25rem; cursor:pointer; color:#64748B;">✕</button>
+    </div>
+    <div class="modal-body" style="padding:24px 20px;">
+      <p style="font-size:0.9rem; color:#64748B; margin-bottom:18px;">
+        खरेदी पावतीचा फोटो निवडा किंवा काढा. सिस्टीम मागील खरेदी इतिहास व २२% रास्त किरकोळ दराशी तुलना करून ऑडिट करेल.
+      </p>
+      
+      <button type="button" id="btn-analyzer-action-camera" class="btn btn-outline-primary w-100 py-3 mb-2 fw-bold d-flex align-items-center justify-content-center" style="font-size:1rem; border-radius:10px; border:2px solid #0284C7; color:#0369A1; background:#F0F9FF; transition:all 0.2s; width:100%; padding:14px; margin-bottom:12px; cursor:pointer;">
+        <i class="bi bi-camera me-2 fs-5"></i> थेट कॅमेऱ्याने पावतीचा फोटो काढा
+      </button>
+
+      <button type="button" id="btn-analyzer-action-gallery" class="btn btn-outline-secondary w-100 py-3 fw-bold d-flex align-items-center justify-content-center" style="font-size:1rem; border-radius:10px; border:2px solid #94A3B8; color:#334155; background:#F8FAFC; transition:all 0.2s; width:100%; padding:14px; cursor:pointer;">
+        <i class="bi bi-image me-2 fs-5"></i> गॅलरीतून पावतीचा फोटो निवडा
+      </button>
+
+      <!-- Hidden file inputs -->
+      <input type="file" id="analyzer-camera-input" accept="image/*" capture="environment" class="d-none" style="display:none;">
+      <input type="file" id="analyzer-gallery-input" accept="image/*" class="d-none" style="display:none;">
+    </div>
+  </div>
+</div>
+
+<!-- Live Webcam Viewfinder Modal for Desktop (Analyzer) -->
+<div id="analyzerWebcamLiveModal" class="modal-overlay" style="display:none; z-index:2150;">
+  <div class="modal-content" style="max-width: 560px; width: 95%; padding: 0; border-radius: 16px; overflow: hidden; box-shadow: 0 12px 36px rgba(0,0,0,0.3);">
+    <div class="modal-header d-flex justify-content-between align-items-center" style="background:#F8FAFC; padding:14px 20px; border-bottom:1px solid #E2E8F0; display:flex; justify-content:space-between; align-items:center;">
+      <div style="display:flex; align-items:center; gap:8px;">
+        <span style="font-size:1.3rem;">📸</span>
+        <h3 style="margin:0; font-size:1.15rem; font-weight:700; color:#1E293B;">थेट कॅमेऱ्याने पावतीचा फोटो काढा</h3>
+      </div>
+      <button type="button" id="close-analyzer-webcam-modal" class="modal-close" style="background:none; border:none; font-size:1.25rem; cursor:pointer; color:#64748B;">✕</button>
+    </div>
+    <div class="modal-body" style="padding:16px; background:#0F172A; text-align:center;">
+      <div style="position:relative; width:100%; border-radius:12px; overflow:hidden; background:#000; min-height:280px; display:flex; align-items:center; justify-content:center;">
+        <video id="analyzer-webcam-video-feed" playsinline autoplay muted style="width:100%; max-height:360px; object-fit:contain; display:block;"></video>
+      </div>
+      <canvas id="analyzer-webcam-snapshot-canvas" style="display:none;"></canvas>
+    </div>
+    <div class="modal-footer" style="padding:14px 20px; border-top:1px solid #E2E8F0; display:flex; justify-content:space-between; align-items:center; background:#F8FAFC;">
+      <button type="button" id="btn-analyzer-cancel-webcam" class="btn btn-secondary" style="border-radius:8px; padding:8px 16px; font-weight:600;">रद्द करा</button>
+      <button type="button" id="btn-analyzer-capture-snapshot" class="btn btn-warning fw-bold" style="border-radius:8px; padding:10px 24px; font-weight:700; display:inline-flex; align-items:center; gap:8px;">
+        📸 फोटो काढा (Capture)
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Full-card / Global Processing Loader for Analyzer Multimodal OCR -->
+<div id="analyzer-photo-processing-loader" class="modal-overlay d-none" style="display:none; z-index:2200; background:rgba(15, 23, 42, 0.75); backdrop-filter:blur(6px);">
+  <div class="modal-content text-center" style="max-width:440px; border-radius:16px; background:#FFFFFF; padding:28px 24px; box-shadow:0 12px 32px rgba(0,0,0,0.25); text-align:center;">
+    <div style="font-size:3rem; margin-bottom:12px; animation: pulse-spinner 1.2s infinite ease-in-out;">
+      ⏳
+    </div>
+    <h4 style="font-size:1.15rem; font-weight:700; color:#1E293B; margin-bottom:8px;">🤖 पावती स्कॅन व ३-वे ऑडिट सुरू आहे...</h4>
+    <p style="font-size:0.92rem; color:#475569; margin:0; line-height:1.6; font-weight:500;">
+      ⏳ पावतीतील वस्तू व भाव AI द्वारे वाचून मागील खरेदी इतिहास व रास्त दरांशी तपासले जात आहेत... कृपया प्रतीक्षा करा.
+    </p>
+  </div>
+</div>
+
+<!-- Live Webcam Viewfinder Modal for Historical Receipt Scanner (Desktop) -->
+<div id="analyzerLiveWebcamModal" class="modal-overlay" style="display:none; z-index:2250;">
+  <div class="modal-content" style="max-width: 560px; width: 95%; padding: 0; border-radius: 16px; overflow: hidden; box-shadow: 0 12px 36px rgba(0,0,0,0.3);">
+    <div class="modal-header d-flex justify-content-between align-items-center" style="background:#F8FAFC; padding:14px 20px; border-bottom:1px solid #E2E8F0; display:flex; justify-content:space-between; align-items:center;">
+      <div style="display:flex; align-items:center; gap:8px;">
+        <span style="font-size:1.3rem;">📸</span>
+        <h3 style="margin:0; font-size:1.15rem; font-weight:700; color:#1E293B;">थेट कॅमेऱ्याने पावतीचा फोटो काढा</h3>
+      </div>
+      <button type="button" id="closeAnalyzerLiveWebcamModal" class="modal-close" style="background:none; border:none; font-size:1.25rem; cursor:pointer; color:#64748B;">✕</button>
+    </div>
+    <div class="modal-body" style="padding:16px; background:#0F172A; text-align:center;">
+      <div style="position:relative; width:100%; border-radius:12px; overflow:hidden; background:#000; min-height:280px; display:flex; align-items:center; justify-content:center;">
+        <video id="webcamVideoFeed" playsinline autoplay muted style="width:100%; max-height:360px; object-fit:contain; display:block;"></video>
+      </div>
+      <canvas id="webcamCanvas" style="display:none;"></canvas>
+    </div>
+    <div class="modal-footer" style="padding:14px 20px; border-top:1px solid #E2E8F0; display:flex; justify-content:space-between; align-items:center; background:#F8FAFC;">
+      <button type="button" id="btnCancelWebcam" class="btn btn-secondary" style="border-radius:8px; padding:8px 16px; font-weight:600;">रद्द करा</button>
+      <button type="button" id="btnCaptureWebcam" class="btn btn-warning fw-bold" style="border-radius:8px; padding:10px 24px; font-weight:700; display:inline-flex; align-items:center; gap:8px;">
+        📸 फोटो काढा (Capture)
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Historical Receipt Upload & Baseline Ingestion Modal (DIRECT ENTRY) -->
+<div id="uploadHistoricalBillModal" class="modal-overlay modal fade" tabindex="-1" aria-labelledby="uploadHistoricalBillModalLabel" aria-hidden="true" style="display:none; z-index:2200;">
+  <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable" style="width:100%; max-width:800px; margin:auto; display:flex; align-items:center; justify-content:center; max-height:90vh;">
+    <div class="modal-content" style="max-height: 90vh; display: flex; flex-direction: column; overflow: hidden; border-radius: 12px; width:100%; background:#ffffff; box-shadow:0 12px 36px rgba(0,0,0,0.25);">
+      
+      <!-- Modal Header -->
+      <div class="modal-header" style="background:#F8FAFC; padding:16px 20px; border-bottom:1px solid #E2E8F0; display:flex; justify-content:space-between; align-items:center; flex-shrink:0;">
+        <div style="display:flex; align-items:center; gap:8px;">
+          <span style="font-size:1.4rem;">🧾</span>
+          <h3 id="uploadHistoricalBillModalLabel" style="margin:0; font-size:1.15rem; font-weight:700; color:#1E293B;">📷 जुनी पावती स्कॅन करा (इतिहास जोडा)</h3>
+        </div>
+        <button type="button" id="closeHistoricalBillModal" class="modal-close btn-close" data-bs-dismiss="modal" aria-label="Close" style="background:none; border:none; font-size:1.3rem; cursor:pointer; color:#64748B;">✕</button>
+      </div>
+      
+      <!-- Modal Body (Scrollable) -->
+      <div class="modal-body" style="overflow-y: auto; max-height: calc(90vh - 140px); padding: 1.25rem;">
+        <p style="font-size:0.88rem; color:#64748B; margin-top:0; margin-bottom:16px;">
+          आपली जुनी किराणा पावती अपलोड करा किंवा फोटो काढा (एकाधिक पाने उपलब्ध). सिस्टीम पावतीतील सर्व वस्तू व दर थेट आपल्या वैयक्तिक खरेदी इतिहासामध्ये साठवेल, ज्यामुळे सिम्युलेटरला अचूक बेसलाईन मिळेल.
+        </p>
+
+        <!-- 1. Purchase Date Picker for backdating -->
+        <div class="form-group" style="margin-bottom:14px;">
+          <label style="display:block; font-size:0.85rem; font-weight:700; color:#334155; margin-bottom:4px;">१. खरेदी दिनांक (Purchase Date):</label>
+          <input type="date" id="historical-bill-date" class="form-control" style="width:100%; padding:8px 10px; border-radius:6px; border:1px solid #CBD5E1; font-weight:600;">
+        </div>
+
+        <!-- 2. Title & Occasion Selection -->
+        <div class="form-group" style="margin-bottom:14px;">
+          <label style="display:block; font-size:0.85rem; font-weight:700; color:#334155; margin-bottom:4px;">२. पावतीचे शीर्षक व प्रसंग (Title & Occasion):</label>
+          <input type="text" id="historical-bill-title" class="form-control" value="मागील किराणा पावती" placeholder="उदा. नियमित किराणा / दिवाळी फराळ २०२५" style="width:100%; padding:8px 10px; border-radius:6px; border:1px solid #CBD5E1; font-weight:600; margin-bottom:8px;">
+          <div style="display:flex; align-items:center; gap:6px; flex-wrap:wrap;">
+            <span style="font-size:0.75rem; color:#64748B; font-weight:600;">त्वरित निवडी:</span>
+            <button type="button" class="btn btn-sm hist-bill-chip" data-title="नियमित किराणा" style="background:#E2E8F0; border:none; border-radius:12px; font-size:0.78rem; padding:2px 10px; cursor:pointer;">नियमित किराणा</button>
+            <button type="button" class="btn btn-sm hist-bill-chip" data-title="दिवाळी फराळ २०२५" style="background:#FEF3C7; color:#92400E; border:none; border-radius:12px; font-size:0.78rem; padding:2px 10px; cursor:pointer;">दिवाळी फराळ</button>
+            <button type="button" class="btn btn-sm hist-bill-chip" data-title="पाहुणचार किराणा" style="background:#E0E7FF; color:#3730A3; border:none; border-radius:12px; font-size:0.78rem; padding:2px 10px; cursor:pointer;">पाहुणचार</button>
+          </div>
+        </div>
+
+        <!-- 3. Dual Action Triggers & Multi-Image Inputs -->
+        <div class="form-group" style="margin-top:18px;">
+          <label style="display:block; font-size:0.85rem; font-weight:700; color:#334155; margin-bottom:8px;">३. पावतीचा फोटो निवडा (Upload or Capture):</label>
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+            <button type="button" id="btnTriggerCamera" class="btn btn-outline-primary" style="padding:12px 10px; font-weight:700; display:flex; align-items:center; justify-content:center; gap:8px; border:1.5px solid #0284C7; color:#0369A1; border-radius:8px; cursor:pointer; background:#F0F9FF;">
+              <i class="bi bi-camera fs-5"></i> 📸 थेट कॅमेरा (Take Photo)
+            </button>
+            <button type="button" id="btnTriggerGallery" class="btn btn-outline-secondary" style="padding:12px 10px; font-weight:700; display:flex; align-items:center; justify-content:center; gap:8px; border:1.5px solid #64748B; color:#334155; border-radius:8px; cursor:pointer; background:#F8FAFC;">
+              <i class="bi bi-image fs-5"></i> 🖼️ गॅलरी फोटो (Browse Images)
+            </button>
+          </div>
+
+          <!-- Hidden File Inputs -->
+          <input type="file" id="historicalBillInput" multiple accept="image/*" class="d-none" style="display:none;">
+          <input type="file" id="historicalBillCameraInput" accept="image/*" capture="environment" class="d-none" style="display:none;">
+
+          <!-- Multi-Image Preview Container -->
+          <div id="imagePreviewContainer" class="d-flex flex-wrap gap-2 p-2 bg-light rounded border d-none" style="display:none; gap:8px; padding:10px; background:#F8FAFC; border:1px solid #E2E8F0; border-radius:8px; margin-top:12px; margin-bottom:8px; align-items:center;"></div>
+
+          <!-- Add More Photo Button (+ आणखी एक फोटो जोडा (पान २)) -->
+          <div style="margin-top:8px;">
+            <button type="button" id="btnAddMorePhoto" class="btn btn-outline-primary btn-sm d-none" style="display:none; font-weight:700; border-radius:6px; padding:6px 14px; border:1.5px dashed #0284C7; background:#F0F9FF; color:#0369A1;">
+              <i class="bi bi-plus-circle"></i> + आणखी एक फोटो जोडा (पान २)
+            </button>
+          </div>
+        </div>
+
+        <!-- 4. Container for Scanned Review Table within Modal -->
+        <div id="hist-bill-review-area" style="display:none; margin-top:18px; border-top:1px solid #E2E8F0; padding-top:14px;">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; flex-wrap:wrap; gap:8px;">
+            <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+              <strong style="color:#0F172A; font-size:0.95rem;">📋 स्कॅन केलेल्या वस्तू व दर (एकत्रित यादी):</strong>
+              <span class="badge bg-primary fs-6 ms-2" id="totalScannedCount">एकूण वस्तू: 0</span>
+              <button type="button" id="btnVoiceCorrection" class="btn btn-outline-primary btn-sm" style="font-weight:700; font-size:0.82rem; display:inline-flex; align-items:center; gap:6px; padding:4px 12px; border-radius:6px; cursor:pointer;">
+                <i class="bi bi-mic-fill"></i> बोलून यादी दुरुस्त करा (Voice Edit)
+              </button>
+              <span id="voiceStatus" class="badge bg-secondary ms-2" style="font-size:0.75rem; padding:5px 8px;">माईक बंद</span>
+            </div>
+            <span id="hist-bill-total-badge" style="font-weight:800; color:#0F766E; font-size:1.05rem;">₹0.00</span>
+          </div>
+          <div style="max-height: 260px; overflow-y: auto; border: 1px solid #dee2e6; border-radius: 8px;">
+            <table class="table table-sm align-middle" style="width:100%; border-collapse:collapse; font-size:0.85rem; margin-bottom:0;">
+              <thead style="background:#F1F5F9; position:sticky; top:0; z-index:10;">
+                <tr>
+                  <th style="padding:8px 10px; text-align:left;">वस्तू (Commodity)</th>
+                  <th style="padding:8px 10px; width:110px; text-align:center;">प्रमाण (Qty)</th>
+                  <th style="padding:8px 10px; width:125px; text-align:right;">दर (प्रति एकक)</th>
+                  <th style="padding:8px 10px; width:120px; text-align:right;">एकूण रक्कम (₹)</th>
+                  <th style="padding:8px 6px; width:40px; text-align:center;"></th>
+                </tr>
+              </thead>
+              <tbody id="hist-bill-items-table-body"></tbody>
+            </table>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Pinned / Sticky Modal Footer (OUT of scrollable body) -->
+      <div class="modal-footer" style="flex-shrink: 0; background: #ffffff; border-top: 1px solid #e9ecef; padding: 0.75rem 1.25rem; z-index: 1055; display: flex; justify-content: flex-end; gap: 10px;">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" id="btnCancelHistoricalBill" style="font-weight:600; padding:8px 16px; border-radius:6px; cursor:pointer;">रद्द करा</button>
+        <button type="button" class="btn btn-primary px-4" id="btnSaveHistoricalBill" style="font-weight:700; padding:8px 20px; border-radius:6px; background:#0F766E; border-color:#0F766E; cursor:pointer;">
+          💾 इतिहासात सेव्ह करा (Save to History)
+        </button>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- Trip Drill-down Modal ("खरेदी तपशील व हिशोब") -->
+<div id="trip-drilldown-modal" class="modal-overlay" style="display:none; z-index:2300;">
+  <div class="modal-content" style="max-width:860px; background:#FFFFFF; border-radius:12px; box-shadow:0 12px 36px rgba(0,0,0,0.25); overflow:hidden;">
+    <div class="modal-header" style="background:#F8FAFC; padding:16px 20px; border-bottom:1px solid #E2E8F0; display:flex; justify-content:space-between; align-items:center;">
+      <h3 style="margin:0; font-size:1.15rem; font-weight:700; color:#1E293B;">🔍 खरेदी तपशील व हिशोब</h3>
+      <button id="close-drilldown-modal" class="modal-close" style="background:none; border:none; font-size:1.3rem; cursor:pointer; color:#64748B;">✕</button>
+    </div>
+    <div class="modal-body" id="trip-drilldown-content" style="padding:20px; max-height:calc(90vh - 120px); overflow-y:auto;">
+      <!-- Populated dynamically via history.js -->
+    </div>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="/static/js/catalog.js?v={{ time }}"></script>
+<script src="/static/js/saved_lists.js?v={{ time }}"></script>
+<script src="/static/js/simulator.js?v={{ time }}"></script>
+<script src="/static/js/analyzer.js?v={{ time }}"></script>
+<script src="/static/js/audit_engine.js?v={{ time }}"></script>
+<script src="/static/js/history.js?v={{ time }}"></script>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  // Defensive failsafe tab navigation
+  const tabButtons = document.querySelectorAll('.tab-btn');
+  const tabContents = document.querySelectorAll('.tab-content');
+
+  function switchTab(btn) {
+    if (!btn) return;
+    const targetId = btn.getAttribute('data-tab');
+    if (!targetId) return;
+
+    tabButtons.forEach(b => { if (b) b.classList.remove('active'); });
+    tabContents.forEach(c => {
+      if (c) {
+        c.classList.remove('active');
+        c.classList.add('d-none');
+      }
+    });
+
+    btn.classList.add('active');
+    const targetEl = document.getElementById(targetId);
+    if (targetEl) {
+      targetEl.classList.remove('d-none');
+      targetEl.classList.add('active');
+    }
+  }
+
+  tabButtons.forEach(btn => {
+    btn.addEventListener('click', function(e) {
+      e.preventDefault();
+      switchTab(btn);
+    });
+    btn.addEventListener('touchend', function(e) {
+      e.preventDefault();
+      switchTab(btn);
+    });
+  });
+});
+</script>
+{% endblock %}

@@ -1,0 +1,27 @@
+<!-- Dedicated Saved Lists Drawer / Modal ("📂 सेव्ह केलेल्या याद्या" - MODULE 5) -->
+<div id="drafts-modal" class="modal-overlay">
+  <div class="modal-content" style="max-width:840px;">
+    <div class="modal-header" style="padding:16px 20px;border-bottom:1px solid #E2E8F0;display:flex;justify-content:space-between;align-items:center;">
+      <div style="display:flex;align-items:center;gap:10px;">
+        <span style="font-size:1.5rem;">📂</span>
+        <div>
+          <h3 style="margin:0;font-size:1.2rem;font-weight:700;color:#0F172A;">जतन केलेल्या किराणा याद्या (Saved Lists)</h3>
+          <p style="margin:2px 0 0 0;font-size:0.82rem;color:#64748B;">ब्राउझर स्टोरेज ('smart_kirana_drafts') व सर्व्हर डेटाबेसमध्ये सुरक्षित</p>
+        </div>
+      </div>
+      <button id="close-drafts-modal" class="modal-close" aria-label="बंद करा" style="background:transparent;border:none;font-size:1.3rem;cursor:pointer;color:#64748B;">✕</button>
+    </div>
+    <div class="modal-body" style="padding:20px;max-height:540px;overflow-y:auto;">
+      <div style="background:#F0FDFA;border:1px solid #99F6E4;border-radius:8px;padding:10px 14px;margin-bottom:16px;display:flex;align-items:center;gap:8px;">
+        <span style="font-size:1.2rem;">💡</span>
+        <span style="font-size:0.88rem;color:#0F766E;">
+          घरी असताना सेव्ह केलेली यादी <strong>१-क्लिकमध्ये थेट काउंटरला पाठवा</strong>. दुकानदारासमोर मोबाईल चालू करताच सर्व वस्तू उपलब्ध राहतील.
+        </span>
+      </div>
+      <div id="saved-lists-container" class="saved-lists-container">
+        <!-- Injected dynamically via saved_lists.js -->
+      </div>
+    </div>
+  </div>
+</div>
+

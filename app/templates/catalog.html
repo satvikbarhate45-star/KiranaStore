@@ -1,0 +1,690 @@
+{% extends "base.html" %}
+
+{% block extra_css %}
+<style>
+  .catalog-page-hero {
+    background: linear-gradient(135deg, #0F766E 0%, #115E59 100%);
+    color: #FFFFFF;
+    padding: 24px 0 18px;
+    margin-bottom: 18px;
+    box-shadow: var(--shadow-md);
+  }
+  .catalog-page-hero h1 {
+    font-size: 1.65rem;
+    font-weight: 700;
+    margin-bottom: 4px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .catalog-page-hero p {
+    font-size: 0.92rem;
+    opacity: 0.92;
+    margin: 0;
+  }
+
+  .catalog-tabs-bar {
+    display: flex;
+    gap: 8px;
+    overflow-x: auto;
+    padding-bottom: 8px;
+    margin-bottom: 16px;
+    -webkit-overflow-scrolling: touch;
+  }
+  .catalog-cat-btn {
+    white-space: nowrap;
+    padding: 7px 14px;
+    border-radius: 20px;
+    border: 1.5px solid #CBD5E1;
+    background: #FFFFFF;
+    color: #334155;
+    font-weight: 700;
+    font-size: 0.84rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    touch-action: manipulation;
+  }
+  .catalog-cat-btn:hover {
+    border-color: #0F766E;
+    color: #0F766E;
+  }
+  .catalog-cat-btn.active {
+    background: #0F766E !important;
+    border-color: #0F766E !important;
+    color: #FFFFFF !important;
+    box-shadow: 0 2px 6px rgba(15, 118, 110, 0.3);
+  }
+
+  /* Grid Layout: Desktop 5-6 cards, Mobile strictly 3 cards */
+  #catalog-grid {
+    display: grid !important;
+    grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)) !important;
+    gap: 12px !important;
+    margin-bottom: 90px;
+  }
+
+  .catalog-card {
+    background: #FFFFFF;
+    border: 1.5px solid #E2E8F0;
+    border-radius: 10px;
+    padding: 10px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+    position: relative;
+    box-sizing: border-box;
+  }
+  .catalog-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+  }
+
+  .catalog-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 4px;
+    margin-bottom: 6px;
+  }
+  .catalog-card-title {
+    font-weight: 700;
+    font-size: 0.9rem;
+    color: #0F172A;
+    line-height: 1.25;
+    word-break: break-word;
+  }
+  .card-live-price {
+    font-size: 0.78rem;
+    font-weight: 800;
+    color: #0F766E;
+    background: #CCFBF1;
+    padding: 1px 6px;
+    border-radius: 4px;
+    white-space: nowrap;
+  }
+
+  .catalog-select-group {
+    margin-bottom: 6px;
+  }
+  .catalog-select-label {
+    font-size: 0.72rem;
+    color: #64748B;
+    font-weight: 600;
+    margin-bottom: 2px;
+    display: block;
+  }
+  .catalog-select {
+    width: 100%;
+    font-size: 0.8rem;
+    padding: 4px 6px;
+    height: 30px;
+    border: 1px solid #CBD5E1;
+    border-radius: 6px;
+    background: #FFFFFF;
+    color: #1E293B;
+  }
+
+  /* Stepper & Unit Row */
+  .catalog-qty-unit-row {
+    display: flex;
+    gap: 4px;
+    margin-bottom: 8px;
+  }
+  .stepper-row {
+    display: flex;
+    align-items: center;
+    border: 1px solid #CBD5E1;
+    border-radius: 6px;
+    overflow: hidden;
+    background: #FFFFFF;
+    height: 30px;
+    flex: 1.1;
+  }
+  .stepper-btn {
+    border: none;
+    background: #F1F5F9;
+    color: #334155;
+    font-size: 0.95rem;
+    font-weight: 800;
+    padding: 0 8px;
+    cursor: pointer;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    touch-action: manipulation;
+  }
+  .stepper-btn:hover {
+    background: #E2E8F0;
+  }
+  .stepper-input {
+    width: 100%;
+    text-align: center;
+    border: none;
+    font-size: 0.82rem;
+    font-weight: 700;
+    padding: 0;
+    color: #0F172A;
+    -moz-appearance: textfield;
+  }
+  .stepper-input::-webkit-outer-spin-button,
+  .stepper-input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+  .card-unit-select {
+    flex: 1;
+    height: 30px;
+    padding: 2px 4px;
+    font-size: 0.78rem;
+    border: 1px solid #CBD5E1;
+    border-radius: 6px;
+    background: #FFFFFF;
+    color: #1E293B;
+    font-weight: 600;
+  }
+
+  .btn-add-item {
+    width: 100%;
+    padding: 6px 4px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    border-radius: 6px;
+    background: #0F766E;
+    color: #FFFFFF;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    transition: background 0.15s ease;
+    touch-action: manipulation;
+  }
+  .btn-add-item:hover {
+    background: #0D9488;
+  }
+  .btn-add-item.added-flash {
+    background: #16A34A !important;
+  }
+
+  /* Sticky Bottom Action Bar */
+  .sticky-catalog-bar {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 1000;
+    background: #0F172A;
+    color: #FFFFFF;
+    padding: 12px 16px;
+    box-shadow: 0 -4px 16px rgba(0,0,0,0.25);
+  }
+
+  /* Mobile Strictly 3-Card Grid (<= 768px) */
+  @media (max-width: 768px) {
+    #catalog-grid {
+      grid-template-columns: repeat(3, 1fr) !important;
+      gap: 6px !important;
+    }
+    .catalog-card {
+      padding: 6px !important;
+      border-radius: 8px !important;
+    }
+    .catalog-card-title {
+      font-size: 0.76rem !important;
+      line-height: 1.15 !important;
+      margin-bottom: 2px !important;
+    }
+    .card-live-price {
+      font-size: 0.7rem !important;
+      padding: 1px 3px !important;
+    }
+    .catalog-select-label {
+      display: none !important;
+    }
+    .catalog-select {
+      font-size: 0.68rem !important;
+      height: 26px !important;
+      padding: 2px 2px !important;
+      margin-bottom: 4px !important;
+    }
+    .catalog-qty-unit-row {
+      flex-direction: column !important;
+      gap: 3px !important;
+      margin-bottom: 4px !important;
+    }
+    .stepper-row {
+      height: 24px !important;
+      width: 100% !important;
+    }
+    .stepper-btn {
+      padding: 0 5px !important;
+      font-size: 0.85rem !important;
+    }
+    .stepper-input {
+      font-size: 0.72rem !important;
+    }
+    .card-unit-select {
+      height: 24px !important;
+      font-size: 0.68rem !important;
+      padding: 1px 2px !important;
+      width: 100% !important;
+    }
+    .btn-add-item {
+      font-size: 0.72rem !important;
+      padding: 4px 2px !important;
+      min-height: 26px !important;
+      border-radius: 4px !important;
+    }
+    .sticky-catalog-bar {
+      padding: 10px 12px !important;
+    }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<section class="catalog-page-hero">
+  <div class="container">
+    <h1>🛒 पॉईंट-अँड-क्लिक किराणा कॅटलॉग</h1>
+    <p>महाराष्ट्रातील संपूर्ण किराणा वस्तू, वाण/ब्रँड व एकक निवडून थेट काउंटरसाठी अचूक यादी तयार करा.</p>
+  </div>
+</section>
+
+<div class="container">
+
+  <!-- Live Search Box -->
+  <div style="margin-bottom:14px;">
+    <input 
+      type="text" 
+      id="catalog-search" 
+      class="form-control" 
+      placeholder="🔍 वस्तू, ब्रँड किंवा वाण शोधा (उदा. साखर, गोडतेल, इंद्रायणी, हळद, तूर डाळ, साबण)..."
+      style="font-size:0.92rem;padding:9px 14px;border-radius:10px;border:1.5px solid #CBD5E1;width:100%;box-sizing:border-box;"
+    />
+  </div>
+
+  <!-- 8 Maharashtra Staple Category Tabs -->
+  <div class="catalog-tabs-bar" id="category-tabs-bar">
+    <!-- Populated via script -->
+  </div>
+
+  <!-- Selected Items Notification Banner -->
+  <div id="catalog-selection-banner" style="background:#F0FDF4;border:1px solid #86EFAC;border-radius:8px;padding:10px 16px;margin-bottom:14px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;">
+    <div style="font-size:0.88rem;color:#166534;font-weight:700;">
+      <span>✅ आतापर्यंत </span>
+      <strong id="banner-count">० वस्तू</strong>
+      <span> जोडल्या आहेत. खालील काउंटर बटणाने थेट मुख्य बिलिंगवर पाठवा.</span>
+    </div>
+    <button type="button" id="btn-quick-finalize" class="btn btn-primary btn-sm" style="background:#0F766E;border:none;font-weight:700;">
+      🛒 काउंटरला पाठवा
+    </button>
+  </div>
+
+  <!-- Cards Grid (Mobile strictly 3 cards per row, desktop 5-6 cards) -->
+  <div id="catalog-grid">
+    <div style="grid-column:1/-1;text-align:center;padding:40px;color:#64748B;">
+      कॅटलॉग लोड होत आहे...
+    </div>
+  </div>
+
+</div>
+
+<!-- Sticky Bottom Action Bar -->
+<div class="sticky-catalog-bar" id="sticky-catalog-bar">
+  <div class="container" style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;">
+    <div style="font-weight:700;font-size:1rem;color:#FFFFFF;display:flex;align-items:center;gap:6px;">
+      <span>🛍️ निवडलेल्या वस्तू:</span>
+      <span id="selected-count-badge" style="background:#FFD54F;color:#1E293B;padding:2px 10px;border-radius:12px;font-size:1.1rem;font-weight:800;">०</span>
+    </div>
+    <button type="button" id="btn-finalize-catalog" class="btn btn-warning" style="font-weight:800;background:linear-gradient(135deg, #FF6A00 0%, #EE5A24 100%);color:#FFF;border:none;box-shadow:0 4px 12px rgba(238,90,36,0.4);padding:10px 20px;border-radius:8px;cursor:pointer;">
+      🛒 यादी अंतिम करा / काउंटरला पाठवा
+    </button>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="/static/js/catalog.js?v={{ time }}"></script>
+<script>
+(function() {
+  let catalogData = null;
+  let activeCategoryId = "grains_pulses";
+  let selectedItems = [];
+
+  // Helper to convert English digits to Devanagari
+  const DEV_DIGITS = ['०', '१', '२', '३', '४', '५', '६', '७', '८', '९'];
+  function toDevDigits(val) {
+    if (val === null || val === undefined) return '';
+    return String(val).replace(/[0-9]/g, d => DEV_DIGITS[d]);
+  }
+
+  async function loadCatalog() {
+    try {
+      const resp = await fetch('/api/v1/catalog/visual-groceries?v=' + Date.now());
+      if (!resp.ok) throw new Error("डेटा लोड करता आला नाही");
+      catalogData = await resp.json();
+      if (catalogData.categories && catalogData.categories.length > 0) {
+        activeCategoryId = catalogData.categories[0].id;
+      }
+      renderTabs();
+      renderCards();
+    } catch (err) {
+      console.error(err);
+      document.getElementById('catalog-grid').innerHTML = `
+        <div style="grid-column:1/-1;text-align:center;padding:30px;color:#DC2626;">
+          ⚠️ कॅटलॉग डेटा लोड करण्यात अडचण आली. कृपया रीफ्रेश करा.
+        </div>
+      `;
+    }
+  }
+
+  function renderTabs() {
+    const tabsBar = document.getElementById('category-tabs-bar');
+    if (!tabsBar || !catalogData || !catalogData.categories) return;
+
+    tabsBar.innerHTML = catalogData.categories.map((cat) => `
+      <button 
+        type="button" 
+        class="catalog-cat-btn ${cat.id === activeCategoryId ? 'active' : ''}" 
+        data-cat-id="${cat.id}"
+      >
+        ${cat.name_mr}
+      </button>
+    `).join('');
+
+    tabsBar.querySelectorAll('.catalog-cat-btn').forEach(btn => {
+      const switchCat = (e) => {
+        if (e && e.type === 'touchend') e.preventDefault();
+        tabsBar.querySelectorAll('.catalog-cat-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        activeCategoryId = btn.dataset.catId;
+        const searchInput = document.getElementById('catalog-search');
+        if (searchInput) searchInput.value = '';
+        renderCards();
+      };
+      btn.addEventListener('click', switchCat);
+      btn.addEventListener('touchend', switchCat);
+    });
+  }
+
+  function getUnitDropdownHtml(unitType) {
+    if (unitType === 'weight') {
+      return `
+        <option value="किलो" data-mult="1.0" selected>किलो (kg)</option>
+        <option value="ग्रॅम" data-mult="0.001">ग्रॅम (gm)</option>
+      `;
+    } else if (unitType === 'volume') {
+      return `
+        <option value="लिटर" data-mult="1.0" selected>लिटर (L)</option>
+        <option value="मिली" data-mult="0.001">मिली (ml)</option>
+      `;
+    } else {
+      return `
+        <option value="नग" data-mult="1.0" selected>नग (Pcs)</option>
+        <option value="पाकीट" data-mult="1.0">पाकीट (Pkt)</option>
+        <option value="डबी" data-mult="1.0">डबी (Box)</option>
+      `;
+    }
+  }
+
+  function renderCards(searchQuery = '') {
+    const grid = document.getElementById('catalog-grid');
+    if (!grid || !catalogData) return;
+
+    let itemsToRender = [];
+    if (searchQuery && searchQuery.trim()) {
+      const q = searchQuery.toLowerCase().trim();
+      catalogData.categories.forEach(cat => {
+        cat.items.forEach(it => {
+          const matchName = it.name_mr.toLowerCase().includes(q);
+          const matchVariety = (it.varieties || it.brands || []).some(b => b.toLowerCase().includes(q));
+          if (matchName || matchVariety) itemsToRender.push(it);
+        });
+      });
+    } else {
+      const cat = catalogData.categories.find(c => c.id === activeCategoryId);
+      if (cat) itemsToRender = cat.items || [];
+    }
+
+    if (itemsToRender.length === 0) {
+      grid.innerHTML = `
+        <div style="grid-column:1/-1;text-align:center;padding:36px;color:#64748B;background:#FFFFFF;border-radius:8px;border:1px dashed #CBD5E1;">
+          <div style="font-size:2rem;margin-bottom:6px;">🔍</div>
+          <strong style="color:#1E293B;">कोणतीही वस्तू सापडली नाही</strong>
+        </div>
+      `;
+      return;
+    }
+
+    grid.innerHTML = itemsToRender.map(item => {
+      const varieties = item.varieties || item.brands || ["सामान्य"];
+      const varietyOptions = varieties
+        .map(v => `<option value="${v}">${v}</option>`)
+        .join('');
+
+      const unitOptions = getUnitDropdownHtml(item.unit_type || 'count');
+      const basePrice = item.base_price || 0;
+
+      return `
+        <div class="catalog-card" data-item-id="${item.id}" data-base-price="${basePrice}" data-unit-type="${item.unit_type || 'count'}">
+          <div>
+            <div class="catalog-card-header">
+              <span class="catalog-card-title">${item.name_mr}</span>
+              <span class="card-live-price">₹${basePrice}</span>
+            </div>
+
+            <!-- Single Consolidated Card: Variety/Brand Dropdown -->
+            <div class="catalog-select-group">
+              <label class="catalog-select-label">वाण / ब्रँड:</label>
+              <select class="catalog-select card-variety-select">
+                ${varietyOptions}
+              </select>
+            </div>
+
+            <!-- Dynamic Measurement Unit & Numeric Input Stepper -->
+            <div class="catalog-qty-unit-row">
+              <div class="stepper-row">
+                <button type="button" class="stepper-btn card-minus-btn">-</button>
+                <input type="number" step="any" min="0.01" class="stepper-input card-qty-val" value="1" />
+                <button type="button" class="stepper-btn card-plus-btn">+</button>
+              </div>
+              <select class="card-unit-select">
+                ${unitOptions}
+              </select>
+            </div>
+          </div>
+
+          <button 
+            type="button" 
+            class="btn-add-item" 
+            data-name="${item.name_mr}" 
+            data-base-price="${basePrice}"
+            data-unit-type="${item.unit_type || 'count'}"
+          >
+            <span>➕ यादीत जोडा</span>
+          </button>
+        </div>
+      `;
+    }).join('');
+  }
+
+  function updateCardLivePrice(card) {
+    if (!card) return;
+    const basePrice = parseFloat(card.dataset.basePrice) || 0;
+    const qtyInput = card.querySelector('.card-qty-val');
+    const unitSelect = card.querySelector('.card-unit-select');
+    const livePriceEl = card.querySelector('.card-live-price');
+    if (!qtyInput || !unitSelect || !livePriceEl) return;
+
+    const qty = parseFloat(qtyInput.value) || 0;
+    const selectedOpt = unitSelect.options[unitSelect.selectedIndex];
+    const mult = selectedOpt ? (parseFloat(selectedOpt.dataset.mult) || 1.0) : 1.0;
+
+    const lineTotal = Math.round(qty * mult * basePrice * 100) / 100;
+    livePriceEl.innerText = '₹' + (lineTotal % 1 === 0 ? lineTotal : lineTotal.toFixed(1));
+  }
+
+  function updateCountBadge() {
+    const totalCount = selectedItems.length;
+    const badge = document.getElementById('selected-count-badge');
+    const bannerCount = document.getElementById('banner-count');
+    if (badge) badge.innerText = toDevDigits(totalCount);
+    if (bannerCount) bannerCount.innerText = `${toDevDigits(totalCount)} वस्तू`;
+  }
+
+  function finalizeAndSendToCounter() {
+    if (selectedItems.length === 0) {
+      if (typeof showToast === 'function') {
+        showToast("कृपया आधी किमान एक वस्तू यादीत जोडा.", "warn");
+      } else {
+        alert("कृपया आधी किमान एक वस्तू यादीत जोडा.");
+      }
+      return;
+    }
+
+    // Save array to localStorage key specified in instruction: 'smart_kirana_pending_items'
+    localStorage.setItem('smart_kirana_pending_items', JSON.stringify(selectedItems));
+    
+    // Navigate straight to '/'
+    window.location.href = '/';
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    loadCatalog();
+
+    // Search filter input
+    const searchInput = document.getElementById('catalog-search');
+    if (searchInput) {
+      searchInput.addEventListener('input', (e) => {
+        renderCards(e.target.value);
+      });
+    }
+
+    // Grid Event Delegation
+    const grid = document.getElementById('catalog-grid');
+    if (grid) {
+      // Stepper & Add Button clicks
+      const handleGridAction = (e) => {
+        const card = e.target.closest('.catalog-card');
+        if (!card) return;
+
+        const qtyInput = card.querySelector('.card-qty-val');
+        const unitSelect = card.querySelector('.card-unit-select');
+
+        if (e.target.classList.contains('card-minus-btn')) {
+          if (e.type === 'touchend') e.preventDefault();
+          const curr = parseFloat(qtyInput.value) || 1;
+          const uVal = unitSelect ? unitSelect.value : 'किलो';
+          const step = (uVal === 'ग्रॅम' || uVal === 'मिली') ? 50 : 1;
+          if (curr > step) {
+            qtyInput.value = curr - step;
+          } else if (curr > 1) {
+            qtyInput.value = curr - 1;
+          }
+          updateCardLivePrice(card);
+        } else if (e.target.classList.contains('card-plus-btn')) {
+          if (e.type === 'touchend') e.preventDefault();
+          const curr = parseFloat(qtyInput.value) || 1;
+          const uVal = unitSelect ? unitSelect.value : 'किलो';
+          const step = (uVal === 'ग्रॅम' || uVal === 'मिली') ? 50 : 1;
+          qtyInput.value = curr + step;
+          updateCardLivePrice(card);
+        } else if (e.target.closest('.btn-add-item')) {
+          if (e.type === 'touchend') e.preventDefault();
+          const btn = e.target.closest('.btn-add-item');
+          const baseName = btn.dataset.name;
+          const basePrice = parseFloat(btn.dataset.basePrice) || 0.0;
+
+          const varietySelect = card.querySelector('.card-variety-select');
+          const varietyVal = varietySelect ? varietySelect.value.trim() : '';
+
+          const selectedUnit = unitSelect ? unitSelect.value : 'किलो';
+          const selectedOpt = unitSelect ? unitSelect.options[unitSelect.selectedIndex] : null;
+          const mult = selectedOpt ? (parseFloat(selectedOpt.dataset.mult) || 1.0) : 1.0;
+
+          const enteredQty = parseFloat(qtyInput.value) || 1.0;
+          const lineTotal = Math.round(enteredQty * mult * basePrice * 100) / 100;
+
+          // Composite variety name format: 'तांदूळ [इंद्रायणी]'
+          const fullName = (varietyVal && varietyVal !== 'सामान्य') ? `${baseName} [${varietyVal}]` : baseName;
+
+          selectedItems.push({
+            name: fullName,
+            base_name: baseName,
+            brand: varietyVal,
+            variety: varietyVal,
+            quantity: enteredQty,
+            qty: enteredQty,
+            unit: selectedUnit,
+            display_qty: enteredQty,
+            display_unit: selectedUnit,
+            quantity_norm: mult === 0.001 ? (enteredQty / 1000.0) : enteredQty,
+            canonical_unit: (selectedUnit === 'लिटर' || selectedUnit === 'मिली') ? 'L' : (selectedUnit === 'नग' || selectedUnit === 'पाकीट' || selectedUnit === 'डबी') ? 'pcs' : 'kg',
+            estimated_price: lineTotal,
+            target_price: lineTotal > 0 ? lineTotal : null
+          });
+
+          updateCountBadge();
+
+          // Button feedback flash
+          btn.classList.add('added-flash');
+          btn.innerHTML = '<span>✓ जोडले!</span>';
+          setTimeout(() => {
+            btn.classList.remove('added-flash');
+            btn.innerHTML = '<span>➕ यादीत जोडा</span>';
+          }, 800);
+
+          if (typeof showToast === 'function') {
+            showToast(`'${fullName}' यादीत जोडले!`, 'success', 2000);
+          }
+        }
+      };
+
+      grid.addEventListener('click', handleGridAction);
+      grid.addEventListener('touchend', handleGridAction);
+
+      // Listen for direct quantity input or unit change
+      grid.addEventListener('input', (e) => {
+        if (e.target.classList.contains('card-qty-val')) {
+          const card = e.target.closest('.catalog-card');
+          updateCardLivePrice(card);
+        }
+      });
+
+      grid.addEventListener('change', (e) => {
+        if (e.target.classList.contains('card-unit-select')) {
+          const card = e.target.closest('.catalog-card');
+          const qtyInput = card.querySelector('.card-qty-val');
+          const uVal = e.target.value;
+
+          // Context-aware auto switch quantity default
+          if ((uVal === 'ग्रॅम' || uVal === 'मिली') && parseFloat(qtyInput.value) === 1) {
+            qtyInput.value = 500;
+          } else if ((uVal === 'किलो' || uVal === 'लिटर') && parseFloat(qtyInput.value) === 500) {
+            qtyInput.value = 1;
+          }
+          updateCardLivePrice(card);
+        }
+      });
+    }
+
+    // Finalize buttons
+    const finBtn = document.getElementById('btn-finalize-catalog');
+    if (finBtn) {
+      finBtn.addEventListener('click', finalizeAndSendToCounter);
+      finBtn.addEventListener('touchend', (e) => { e.preventDefault(); finalizeAndSendToCounter(); });
+    }
+
+    const quickFinBtn = document.getElementById('btn-quick-finalize');
+    if (quickFinBtn) {
+      quickFinBtn.addEventListener('click', finalizeAndSendToCounter);
+      quickFinBtn.addEventListener('touchend', (e) => { e.preventDefault(); finalizeAndSendToCounter(); });
+    }
+  });
+})();
+</script>
+{% endblock %}
