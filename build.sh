@@ -12,3 +12,4 @@ echo "--- RUNNING DATABASE MIGRATIONS ON SUPABASE ---"
 python manage.py migrate
 
 echo "--- BUILD COMPLETED SUCCESSFULLY ---"
+

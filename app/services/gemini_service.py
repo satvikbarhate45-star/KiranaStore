@@ -15,7 +15,7 @@ api_key = os.getenv("GEMINI_API_KEY")
 model_name = os.getenv("GEMINI_MODEL", "gemini-2.5-flash")
 
 if not api_key:
-    print("[FATAL ERROR] GEMINI_API_KEY is not defined in the environment!")
+    print("[WARNING] GEMINI_API_KEY is not defined in the environment. Operating in OCR fallback mode.")
 
 import concurrent.futures
 from sqlalchemy.orm import Session

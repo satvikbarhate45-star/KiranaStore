@@ -29,15 +29,16 @@ STATIC_DIR = BASE_DIR / "app" / "static"
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # Startup: ensure tables, seed catalog, and sanitize records
-    Base.metadata.create_all(bind=engine)
-    db = SessionLocal()
+    # Startup: ensure tables and seed catalog with timeout resilience
     try:
-        seed_database(db)
-        from app.database import run_historical_sanitization
-        run_historical_sanitization(db)
-    finally:
-        db.close()
+        Base.metadata.create_all(bind=engine)
+        db = SessionLocal()
+        try:
+            seed_database(db)
+        finally:
+            db.close()
+    except Exception as e:
+        print(f"[Lifespan Startup Non-fatal Warning]: {e}")
     yield
     # Shutdown
 
