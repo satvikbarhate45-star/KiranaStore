@@ -68,6 +68,26 @@ def contact_view(request):
         "time": int(time.time())
     })
 
+def view_receipt(request, receipt_id):
+    """
+    Renders clean printable receipt for a grocery trip.
+    Dispatches to internal FastAPI receipt engine with Jinja2 template.
+    """
+    if request.method == "HEAD":
+        return safe_healthcheck(request)
+
+    client = get_test_client()
+    try:
+        response = client.get(f"/receipt/{receipt_id}")
+        content_type = response.headers.get("content-type", "text/html; charset=utf-8")
+        return HttpResponse(
+            content=response.content,
+            status=response.status_code,
+            content_type=content_type
+        )
+    except Exception as exc:
+        return HttpResponse(f"खरेदी पावती लोड करताना अडचण आली: {exc}", status=500)
+
 # In-thread synchronous API dispatcher (Zero thread deadlock, zero background loops)
 _test_client = None
 

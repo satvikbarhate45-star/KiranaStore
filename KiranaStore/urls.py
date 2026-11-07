@@ -10,6 +10,7 @@ from KiranaStore.views import (
     analyzer_view,
     about_view,
     contact_view,
+    view_receipt,
     api_dispatcher,
 )
 
@@ -34,6 +35,12 @@ urlpatterns = [
     path("about/", about_view, name="about_slash"),
     path("contact", contact_view, name="contact"),
     path("contact/", contact_view, name="contact_slash"),
+
+    # Printable Receipt Routes (Fixes 404 at /receipt/<id>)
+    path("receipt/<int:receipt_id>/", view_receipt, name="view_receipt"),
+    path("receipt/<int:receipt_id>", view_receipt, name="view_receipt_no_slash"),
+    path("receipt/<str:receipt_id>/", view_receipt, name="view_receipt_str"),
+    path("receipt/<str:receipt_id>", view_receipt, name="view_receipt_str_no_slash"),
 
     # Synchronous API Routing
     re_path(r"^api/(?P<path>.*)$", api_dispatcher, name="api_dispatcher"),
