@@ -72,13 +72,19 @@ if STATICFILES_DIR.exists():
 else:
     app.mount("/static", StaticFiles(directory=str(STATIC_DIR)), name="static")
 
-# Instant Zero-DB Healthcheck Routes for Render Port Detection
+# Instant Zero-DB Healthcheck Routes for Render Port Detection & Probes
+@app.head("/", include_in_schema=False)
+@app.head("/healthz", include_in_schema=False)
+@app.head("/health", include_in_schema=False)
+@app.head("/ping", include_in_schema=False)
 @app.get("/healthz", include_in_schema=False)
 @app.get("/healthz/", include_in_schema=False)
+@app.get("/health", include_in_schema=False)
+@app.get("/health/", include_in_schema=False)
 @app.get("/ping", include_in_schema=False)
 @app.get("/ping/", include_in_schema=False)
 def instant_ping():
-    return HTMLResponse("KiranaStore Live", status_code=200)
+    return HTMLResponse("KiranaStore Production OK", status_code=200)
 
 # Custom HTTP Exception Handler (400, 401, 403, 404, 500)
 @app.exception_handler(StarletteHTTPException)

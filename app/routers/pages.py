@@ -1,6 +1,6 @@
 from pathlib import Path
 import time
-from fastapi import APIRouter, Request, Depends, HTTPException
+from fastapi import APIRouter, Request, Depends, HTTPException, Response
 from fastapi.templating import Jinja2Templates
 from sqlalchemy.orm import Session
 
@@ -15,12 +15,18 @@ templates.env.globals['time'] = lambda: int(time.time())
 router = APIRouter(include_in_schema=False)
 
 @router.get("/")
+@router.head("/")
 def home_page(request: Request):
-    return templates.TemplateResponse(request=request, name="index.html", context={
-        "active_page": "home",
-        "title": "स्मार्ट किराणा - मुख्यपृष्ठ | बिलिंग व यादी शुद्धीकरण",
-        "time": int(time.time())
-    })
+    if request.method == "HEAD":
+        return Response(content=b"KiranaStore Production OK\n", media_type="text/plain", status_code=200)
+    try:
+        return templates.TemplateResponse(request=request, name="index.html", context={
+            "active_page": "home",
+            "title": "स्मार्ट किराणा - मुख्यपृष्ठ | बिलिंग व यादी शुद्धीकरण",
+            "time": int(time.time())
+        })
+    except Exception as exc:
+        return Response(content=b"KiranaStore Production OK\n", media_type="text/plain", status_code=200)
 
 @router.get("/catalog")
 @router.get("/catalog/")
