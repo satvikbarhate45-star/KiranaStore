@@ -40,6 +40,10 @@ class Settings(BaseSettings):
     def get_database_url(self) -> str:
         raw_url = (self.DATABASE_URL or os.getenv("DATABASE_URL", "")).strip()
         if raw_url:
+            # Upgrade port 6543 (transaction pooler) to 5432 (session pooler)
+            if ":6543" in raw_url:
+                raw_url = raw_url.replace(":6543", ":5432")
+
             # Normalize legacy 'postgres://' schema to 'postgresql://' for SQLAlchemy 2.0+
             if raw_url.startswith("postgres://"):
                 raw_url = "postgresql://" + raw_url[len("postgres://"):]

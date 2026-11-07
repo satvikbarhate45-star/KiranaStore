@@ -18,6 +18,7 @@ ALLOWED_HOSTS = ['*']
 CSRF_TRUSTED_ORIGINS = [
     'https://*.onrender.com',
     'https://kiranastore-8os8.onrender.com',
+    'https://kiranastore.onrender.com',
     'https://onrender.com',
     'http://127.0.0.1:8000',
     'http://localhost:8000',
@@ -25,16 +26,22 @@ CSRF_TRUSTED_ORIGINS = [
     'http://localhost'
 ]
 
-# Database Configuration with Supabase PostgreSQL (Eliminates 502 / startup hangs)
-DATABASE_URL = os.getenv(
-    "DATABASE_URL",
-    "postgresql://postgres.qpmbydosjurxxicdjbeg:Kirana%40Store1@aws-0-ap-south-1.pooler.supabase.com:6543/postgres?sslmode=require"
-)
+# Database Configuration with Supabase PostgreSQL Session Pooler (Port 5432)
+# Avoids Port 6543 Transaction Pooler deadlock with Django ORM prepared statements
+raw_db_url = os.getenv("DATABASE_URL", "").strip()
+if not raw_db_url:
+    raw_db_url = "postgresql://postgres.qpmbydosjurxxicdjbeg:Kirana%40Store1@aws-0-ap-south-1.pooler.supabase.com:5432/postgres?sslmode=require"
+
+# Automatically normalize port 6543 -> 5432 for session pooler compatibility
+if ":6543" in raw_db_url:
+    raw_db_url = raw_db_url.replace(":6543", ":5432")
+
+DATABASE_URL = raw_db_url
 
 # Robust dj-database-url config with SSL, zero idle pooling and connect timeout
 DATABASES = {
     'default': dj_database_url.config(
-        default=os.environ.get('DATABASE_URL', DATABASE_URL),
+        default=DATABASE_URL,
         conn_max_age=0,               # Close idle connections to prevent pool exhaustion
         conn_health_checks=False,     # Disable blocking ping on startup
         ssl_require=True

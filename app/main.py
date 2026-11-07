@@ -54,6 +54,8 @@ app.add_middleware(
     allow_origins=[
         "*",
         "https://*.onrender.com",
+        "https://kiranastore-8os8.onrender.com",
+        "https://kiranastore.onrender.com",
         "https://onrender.com",
         "http://127.0.0.1:8000",
         "http://localhost:8000"
