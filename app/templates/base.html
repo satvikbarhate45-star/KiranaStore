@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover">
-  <title>{{ title or "स्मार्ट किराणा एंटरप्राइज" }}</title>
+  <title>{% if title %}{{ title }}{% else %}स्मार्ट किराणा एंटरप्राइज{% endif %}</title>
   <meta name="description" content="स्मार्ट किराणा एंटरप्राइज - AI यादी शुद्धीकरण, रिव्हर्स बिलिंग पद्धत, भाववाढ ऑडिट व सुरक्षित शून्य-कीईंग UPI पेमेंट.">
   <meta name="theme-color" content="#FF6A00">
 
