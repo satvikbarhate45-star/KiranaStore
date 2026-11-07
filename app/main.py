@@ -814,15 +814,24 @@ def get_seasonal_replay(occasion: str = "", occasion_type: str = "festive", db: 
     return query_seasonal_event_replay(db, occasion=occasion, occasion_type=occasion_type)
 
 @app.post("/api/scan-grocery-image")
-async def scan_grocery_image_endpoint(image: UploadFile = File(...)):
+@app.post("/api/upload-receipt")
+@app.post("/api/upload-receipt/")
+async def scan_grocery_image_endpoint(
+    image: UploadFile = File(None),
+    receipt_image: UploadFile = File(None)
+):
     """
     Multimodal Vision OCR & Normalization Endpoint.
     Deciphers handwritten or printed Marathi grocery slips and extracts items.
+    Accepts both 'receipt_image' and 'image' multipart fields.
     """
     from app.services.gemini_service import analyze_grocery_image
+    target_file = receipt_image if receipt_image is not None else image
+    if target_file is None:
+        return {"success": False, "error": "No image file provided in upload.", "items": []}
     try:
-        image_bytes = await image.read()
-        mime_type = image.content_type or "image/jpeg"
+        image_bytes = await target_file.read()
+        mime_type = target_file.content_type or "image/jpeg"
         res = analyze_grocery_image(image_bytes=image_bytes, mime_type=mime_type)
         return res
     except Exception as e:

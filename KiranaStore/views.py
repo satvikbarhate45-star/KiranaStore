@@ -96,14 +96,33 @@ def api_dispatcher(request, path=""):
         elif k in ("CONTENT_TYPE", "CONTENT_LENGTH") and v:
             headers[k.replace("_", "-").lower()] = str(v)
 
-    body = request.body if method in ("POST", "PUT", "PATCH") else None
+    files = {}
+    data = {}
+    body = None
+
+    content_type_header = request.META.get("CONTENT_TYPE", "").lower()
+    if "multipart/form-data" in content_type_header or len(request.FILES) > 0:
+        for fname, fobj in request.FILES.items():
+            files[fname] = (fobj.name, fobj.read(), fobj.content_type)
+        for k, v in request.POST.items():
+            data[k] = v
+        # Remove Content-Type and Content-Length so TestClient generates correct multipart boundary
+        headers.pop("content-type", None)
+        headers.pop("content-length", None)
+    else:
+        try:
+            body = request.body if method in ("POST", "PUT", "PATCH") else None
+        except Exception:
+            body = None
 
     try:
         response = client.request(
             method=method,
             url=full_path,
             headers=headers,
-            content=body
+            content=body if not files else None,
+            files=files if files else None,
+            data=data if data else None
         )
         content_type = response.headers.get("content-type", "application/json")
         return HttpResponse(
@@ -117,3 +136,4 @@ def api_dispatcher(request, path=""):
             "error": "API Dispatch Error",
             "detail": str(exc)
         }, status=500)
+

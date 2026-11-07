@@ -744,11 +744,12 @@ function initGrocerySlipScanner() {
   const closeModalBtn = document.getElementById('close-photo-modal');
   const actionCamBtn = document.getElementById('btn-action-camera');
   const actionGalBtn = document.getElementById('btn-action-gallery');
+  const receiptCamInput = document.getElementById('receipt-camera-input');
   const camInput = document.getElementById('camera-capture-input');
   const galInput = document.getElementById('gallery-file-input');
   const loader = document.getElementById('photo-processing-loader');
 
-  if (!openModalBtn && !camInput && !galInput) return;
+  if (!openModalBtn && !receiptCamInput && !camInput && !galInput) return;
 
   function showModal() {
     if (modal) {
@@ -902,9 +903,37 @@ function initGrocerySlipScanner() {
     });
   }
 
+  function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+      const cookies = document.cookie.split(';');
+      for (let i = 0; i < cookies.length; i++) {
+        const cookie = cookies[i].trim();
+        if (cookie.substring(0, name.length + 1) === (name + '=')) {
+          cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+          break;
+        }
+      }
+    }
+    return cookieValue || '';
+  }
+
   async function handleFileSelected(file) {
     if (!file) return;
     hideModal();
+
+    // Show local preview immediately without waiting for network (Zero Page Reload)
+    const previewContainer = document.getElementById('receipt-preview-container');
+    const previewImg = document.getElementById('receipt-preview');
+    if (previewImg) {
+      try {
+        const previewUrl = URL.createObjectURL(file);
+        previewImg.src = previewUrl;
+        if (previewContainer) previewContainer.style.display = 'block';
+      } catch (e) {
+        console.warn("Could not generate object URL for preview:", e);
+      }
+    }
 
     if (loader) {
       loader.classList.remove('d-none');
@@ -914,9 +943,11 @@ function initGrocerySlipScanner() {
 
     try {
       const formData = new FormData();
+      formData.append('receipt_image', file);
       formData.append('image', file);
+      formData.append('csrfmiddlewaretoken', getCookie('csrftoken'));
 
-      const resp = await fetch('/api/scan-grocery-image', {
+      const resp = await fetch('/api/upload-receipt/', {
         method: 'POST',
         body: formData
       });
@@ -926,13 +957,14 @@ function initGrocerySlipScanner() {
       }
 
       const data = await resp.json();
+      console.log("Image processed:", data);
 
       if (data.success && Array.isArray(data.items) && data.items.length > 0) {
         // MODULE 3: Do NOT force premature POS injection!
         // Display interactive "स्कॅन केलेली पावती व बजेट पडताळणी" (Budget & Verification Review Modal)
         openScannedReceiptReviewModal(data.items);
       } else {
-        const errorMsg = "⚠️ फोटो स्पष्ट दिसत नाही किंवा वस्तू ओळखता आल्या नाहीत. कृपया पुन्हा स्पष्ट फोटो काढा.";
+        const errorMsg = data.error || "⚠️ फोटो स्पष्ट दिसत नाही किंवा वस्तू ओळखता आल्या नाहीत. कृपया पुन्हा स्पष्ट फोटो काढा.";
         if (typeof showToast === 'function') {
           showToast(errorMsg, 'error', 4500);
         } else {
@@ -941,7 +973,7 @@ function initGrocerySlipScanner() {
       }
     } catch (err) {
       console.error("[Grocery Slip Scanner Error]:", err);
-      const errorMsg = "⚠️ फोटो स्पष्ट दिसत नाही किंवा वस्तू ओळखता आल्या नाहीत. कृपया पुन्हा स्पष्ट फोटो काढा.";
+      const errorMsg = "⚠️ फोटो अपलोड करताना अडचण आली किंवा वस्तू ओळखता आल्या नाहीत. कृपया पुन्हा प्रयत्न करा.";
       if (typeof showToast === 'function') {
         showToast(errorMsg, 'error', 4500);
       } else {
@@ -953,6 +985,7 @@ function initGrocerySlipScanner() {
         loader.classList.remove('active');
         loader.style.display = 'none';
       }
+      if (receiptCamInput) receiptCamInput.value = '';
       if (camInput) camInput.value = '';
       if (galInput) galInput.value = '';
     }
@@ -1333,18 +1366,29 @@ function initGrocerySlipScanner() {
     }, 15000);
   }
 
-  if (camInput) {
-    camInput.addEventListener('change', (e) => {
-      const file = e.target.files && e.target.files[0];
-      if (file) handleFileSelected(file);
+  const clearPreviewBtn = document.getElementById('clear-receipt-preview-btn');
+  if (clearPreviewBtn) {
+    clearPreviewBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      const previewContainer = document.getElementById('receipt-preview-container');
+      const previewImg = document.getElementById('receipt-preview');
+      if (previewImg) previewImg.src = '';
+      if (previewContainer) previewContainer.style.display = 'none';
+      if (receiptCamInput) receiptCamInput.value = '';
+      if (camInput) camInput.value = '';
+      if (galInput) galInput.value = '';
     });
   }
 
-  if (galInput) {
-    galInput.addEventListener('change', (e) => {
-      const file = e.target.files && e.target.files[0];
-      if (file) handleFileSelected(file);
-    });
-  }
+  // Intercept camera and gallery file inputs with e.preventDefault() to guarantee zero full-page reload
+  [receiptCamInput, camInput, galInput].forEach((inputEl) => {
+    if (inputEl) {
+      inputEl.addEventListener('change', (e) => {
+        e.preventDefault();
+        const file = e.target.files && e.target.files[0];
+        if (file) handleFileSelected(file);
+      });
+    }
+  });
 }
 

@@ -71,9 +71,18 @@
               <button type="submit" id="parse-list-btn" class="btn btn-primary" style="flex:1;">
                 ✨ यादी शुद्ध करा व काउंटरवर पाठवा
               </button>
-              <button type="button" id="btn-open-camera-options" class="btn btn-warning rounded-circle shadow-sm p-0 d-inline-flex align-items-center justify-content-center" style="width: 42px; height: 42px; min-width: 42px;" title="पावती / यादीचा फोटो काढा किंवा निवडा">
+              <button type="button" id="btn-open-camera-options" form="" class="btn btn-warning rounded-circle shadow-sm p-0 d-inline-flex align-items-center justify-content-center" style="width: 42px; height: 42px; min-width: 42px;" title="पावती / यादीचा फोटो काढा किंवा निवडा">
                 <i class="bi bi-camera-fill fs-5 text-dark"></i>
               </button>
+            </div>
+
+            <!-- Instant Local Receipt Preview Container (Zero Page Reload) -->
+            <div id="receipt-preview-container" style="display:none; margin: 12px 0; text-align: center; background: #F8FAFC; padding: 10px; border-radius: 8px; border: 1.5px dashed #CBD5E1;">
+              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+                <span style="font-size:0.82rem; font-weight:700; color:#475569;">📷 निवडलेली पावती / फोटो:</span>
+                <button type="button" id="clear-receipt-preview-btn" style="background:none; border:none; color:#EF4444; font-size:0.8rem; cursor:pointer; font-weight:600;">✕ काढून टाका</button>
+              </div>
+              <img id="receipt-preview" src="" alt="पावती पूर्वावलोकन" style="max-width:100%; max-height:200px; border-radius:6px; object-fit:contain; box-shadow:0 2px 6px rgba(0,0,0,0.1);">
             </div>
             
             <div style="display:flex;gap:8px;margin-top:10px;">
@@ -383,9 +392,10 @@
         <i class="bi bi-image me-2 fs-5"></i> गॅलरीतून फोटो निवडा
       </button>
 
-      <!-- Hidden file inputs -->
-      <input type="file" id="camera-capture-input" accept="image/*" capture="environment" class="d-none" style="display:none;">
-      <input type="file" id="gallery-file-input" accept="image/*" class="d-none" style="display:none;">
+      <!-- Hidden file inputs (Decoupled from forms to prevent full-page reload) -->
+      <input type="file" id="receipt-camera-input" accept="image/*" capture="environment" class="d-none" style="display:none;" form="">
+      <input type="file" id="camera-capture-input" accept="image/*" capture="environment" class="d-none" style="display:none;" form="">
+      <input type="file" id="gallery-file-input" accept="image/*" class="d-none" style="display:none;" form="">
     </div>
   </div>
 </div>
