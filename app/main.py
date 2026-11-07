@@ -29,18 +29,9 @@ STATIC_DIR = BASE_DIR / "app" / "static"
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # Startup: ensure tables and seed catalog with timeout resilience
-    try:
-        Base.metadata.create_all(bind=engine)
-        db = SessionLocal()
-        try:
-            seed_database(db)
-        finally:
-            db.close()
-    except Exception as e:
-        print(f"[Lifespan Startup Non-fatal Warning]: {e}")
+    # Non-blocking startup: Schema is migrated in build.sh
+    # Avoid blocking worker boot loop on Supabase pooler
     yield
-    # Shutdown
 
 import logging
 import time
@@ -78,6 +69,14 @@ if STATICFILES_DIR.exists():
     app.mount("/static", StaticFiles(directory=str(STATICFILES_DIR)), name="static")
 else:
     app.mount("/static", StaticFiles(directory=str(STATIC_DIR)), name="static")
+
+# Instant Zero-DB Healthcheck Routes for Render Port Detection
+@app.get("/healthz", include_in_schema=False)
+@app.get("/healthz/", include_in_schema=False)
+@app.get("/ping", include_in_schema=False)
+@app.get("/ping/", include_in_schema=False)
+def instant_ping():
+    return HTMLResponse("KiranaStore Live", status_code=200)
 
 # Custom HTTP Exception Handler (400, 401, 403, 404, 500)
 @app.exception_handler(StarletteHTTPException)

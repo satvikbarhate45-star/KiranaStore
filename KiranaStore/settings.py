@@ -31,15 +31,21 @@ DATABASE_URL = os.getenv(
     "postgresql://postgres.qpmbydosjurxxicdjbeg:Kirana%40Store1@aws-0-ap-south-1.pooler.supabase.com:6543/postgres?sslmode=require"
 )
 
-# Robust dj-database-url config with SSL and health checks
+# Robust dj-database-url config with SSL, zero idle pooling and connect timeout
 DATABASES = {
     'default': dj_database_url.config(
-        default=DATABASE_URL,
-        conn_max_age=600,
-        conn_health_checks=True,
+        default=os.environ.get('DATABASE_URL', DATABASE_URL),
+        conn_max_age=0,               # Close idle connections to prevent pool exhaustion
+        conn_health_checks=False,     # Disable blocking ping on startup
         ssl_require=True
     )
 }
+
+# Prevent infinite socket hangs with Supabase pooler
+if 'default' in DATABASES and DATABASES['default']:
+    if 'OPTIONS' not in DATABASES['default']:
+        DATABASES['default']['OPTIONS'] = {}
+    DATABASES['default']['OPTIONS']['connect_timeout'] = 10
 
 # Application definition
 INSTALLED_APPS = [
@@ -90,3 +96,4 @@ STATICFILES_DIRS = [os.path.join(BASE_DIR, 'app', 'static')]
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedStaticFilesStorage'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+

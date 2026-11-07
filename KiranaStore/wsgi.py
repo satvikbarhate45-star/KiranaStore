@@ -1,6 +1,6 @@
 """
 WSGI application entrypoint for KiranaStore production deployment on Render.
-Serves full KiranaStore application with WhiteNoise static caching.
+Serves full KiranaStore application with WhiteNoise static caching & zero-DB healthcheck.
 """
 import os
 import sys
@@ -17,15 +17,25 @@ from a2wsgi import ASGIMiddleware
 from whitenoise import WhiteNoise
 from app.main import app
 
-# Wrap FastAPI ASGI app into standard WSGI application for Gunicorn sync workers
+# Wrap FastAPI ASGI app into standard WSGI application for Gunicorn workers
 wsgi_app = ASGIMiddleware(app)
 
 # Wrap with WhiteNoise to serve static files reliably with caching & compression
 staticfiles_dir = BASE_DIR / "staticfiles"
 if staticfiles_dir.exists():
-    application = WhiteNoise(wsgi_app, root=str(staticfiles_dir), prefix="static/")
+    whitenoise_app = WhiteNoise(wsgi_app, root=str(staticfiles_dir), prefix="static/")
 else:
     static_src = BASE_DIR / "app" / "static"
-    application = WhiteNoise(wsgi_app, root=str(static_src), prefix="static/")
+    whitenoise_app = WhiteNoise(wsgi_app, root=str(static_src), prefix="static/")
+
+def application(environ, start_response):
+    path_info = environ.get("PATH_INFO", "")
+    # Instant Zero-DB Healthcheck for Render Port Detection & Health Monitoring
+    if path_info in ("/healthz", "/healthz/", "/ping", "/ping/"):
+        status = "200 OK"
+        headers = [("Content-Type", "text/plain"), ("Content-Length", "15")]
+        start_response(status, headers)
+        return [b"KiranaStore Live"]
+    return whitenoise_app(environ, start_response)
 
 asgi_application = app

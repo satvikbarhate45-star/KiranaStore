@@ -25,10 +25,16 @@ def collectstatic():
 
 def migrate():
     print("[migrate] Synchronizing database schema with Supabase PostgreSQL...")
-    from app.database import engine, Base
+    from app.database import engine, Base, SessionLocal
     from app.models import ProductCatalog, GroceryTrip, TripItem  # Ensure all models imported
+    from app.seed import seed_database
     Base.metadata.create_all(bind=engine)
-    print("[migrate] Database schema synchronization complete. All tables verified.")
+    db = SessionLocal()
+    try:
+        seed_database(db)
+    finally:
+        db.close()
+    print("[migrate] Database schema synchronization and seeding complete. All tables verified.")
 
 def main():
     if len(sys.argv) < 2:
